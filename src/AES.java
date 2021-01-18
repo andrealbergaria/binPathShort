@@ -1,5 +1,4 @@
-package binPathJava;
-
+package binPathShort;
 import java.io.*;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -101,7 +100,7 @@ import javax.crypto.spec.SecretKeySpec;
 				 
 				  if (allPlainTexts != null && !allPlainTexts.isEmpty()) {
 					  // write file lot faster than print it and use bash commands
-					//  util.writeFile();
+					  util.writeFile();
 				  }
 				 else
 					 System.out.println("\n[getPlainTextBlock] No plaintext collected");

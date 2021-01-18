@@ -1,4 +1,4 @@
-package binPathJava;
+package binPathShort;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -154,16 +154,17 @@ public static boolean isAscii(Byte[] keyToBeTested,boolean debug) {
 	     	System.out.println("\n---end array ---");
 		
 	}
-	
-	public static void writeFile() {
+	// somePlainTexts, not to save all into memory and then write it
+
+	public static void writeFile(ArrayList somePlainTexts) {
 		try {
 			
 			
 			FileWriter fw = new FileWriter(AES.plainTextsPath,false);
-			// List of all plaintexts as byte[]
-			ArrayList temp  =AES.allPlainTexts;
-		for (int i=0; i < temp.size() ; i++) {
-			byte[] bc = (byte[]) temp.get(i);
+ 
+			
+		for (int i=0; i < somePlainTexts.size() ; i++) {
+			byte[] bc = (byte[]) somePlainTexts.get(i);
 				String str = getPlaintext(bc);
 				fw.write(str+"\n");
 			}
