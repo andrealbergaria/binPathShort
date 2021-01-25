@@ -31,11 +31,16 @@ import javax.crypto.spec.SecretKeySpec;
 	 public class AES {
 		
 		 public static char[] plainText = {'a','b','c','a','b','c','a','b','c'};
-		 public static char[] plainText2 = {'a','b','c'};
+		 public static byte[] solved = {'a','b','c'};
 		 
-		 public static char[] plainText3 = {'a','b','c','a','b'};
+		 public static char[] str;
+		 public static int idx;
 		 
-		 public static char[] solvedPlainText =  {'a','b','c'};
+		 public static byte[] abc = { 0x61,0x61,0x61}; //0x61,0x61,0x61,0x61,0x61,0x61};
+		 
+		 
+		 
+		 public static String interval = "279841"; // (( 23 ^4))
 		 
 		 public static BigInteger min;
 		 public static BigInteger max;
@@ -44,114 +49,69 @@ import javax.crypto.spec.SecretKeySpec;
 		 public static String plainTextsPath = "/home/andrec/workspace_3_8/binPathShort/plainTexts";
 		 public static String logFilePath = "/home/andrec/workspace_3_8/binPathShort/limits";
 		 public static ArrayList<char[]> allPlainTexts = new ArrayList();
-		 // returns plaintext on [min,max] 
-		 public static void decryptPlainTextBlock()  {
-			 
-				/*key is equal to characters
-				// so 0....65536 , two bytes 65536(two bytes)...131072 (4 bytes?)
-			 655363 -> two bytes
-			 16777216 -> three bytes
-			 
-			 0 < 256 < 65536
-			 65536 < 
-			 
-			 4294967296 -> four bytes
-			 65536 < 16777216 < 4294967296
-			 
-			 65536 < 16777216 < 4294967296
-			 256*256 +1 ,equals three bytes.  256*"256*256
-			 
-			 */
-				 char[] keyAsBytes;
-				 
-				 //char[] t2 = { 'a','b'};
-				 while (min.compareTo(max) < 0) {
-					 keyAsBytes = min.toString().toCharArray();
-					 //util.printArray("KEY",keyAsBytes);
-					 util.printArray("KEY",keyAsBytes);
-					 foundKey = Arrays.equals(keyAsBytes, solvedPlainText);
-					 if (foundKey == true) 
-						 return;
-					
-					 
-					
-					//allPlainTexts.add(keyAsBytes);
-					min = min.add(BigInteger.ONE);
-			     
-				 }
-		 }
-				
-				 
 		 
 		 
 		 public static void main(String[] args) {
-			//getPlainTextBlock();
-			 getPlainAscii();
+		
+			 testCombinations();
 		 }
 		 	 
+		 
+		 public static void add() {
+			   // 0x7E is last printable character
+			   if (str[idx]==0x7E) {
+				   idx++;
+				   // first printable character
+				   str[idx]=0x20;
+
+			   }
+			   else
+				   str[idx]++;
+			   util.printArray("add", str);
+
+		   }
 			 
 		 
-		 public static void getPlainAscii() {
-			 byte[] abc = { 0x61,0x61,0x61,0x61,0x61,0x61};
+		 public static void combinationRange() {
+
 	 
 
 			 
-		
-			 min = new BigInteger(abc);
-		//	 String intervalStr= "1572864";
-	//		 BigInteger t = new BigInteger(intervalStr);
-			 max = min.add(t);
-			System.out.println("min "+min.toString());
-			 //util.printArray("min",min.toString().toCharArray());
-			// util.printArray("max",max.toString().toCharArray());
 			 
-			 /*
-			 int interrupt=0;
-			 long nanoSecs=-1;
-			 long secs=-1;
-			 long mill=-1;
-			 long begin = System.nanoTime();
- 
-			 for (int it=0; it < 2 && foundKey==false; it++) {
+			 while (min.compareTo(max) < 0) {
+				 add();
+				 if (Arrays.equals(abc, solved)) {
+					 foundKey=true;
+					 return;
+				 }
+				
+				
+				 min = min.add(BigInteger.ONE);
+			 }
+				 
+				 
+				 
+
+				
+					
+
+				}
+			 
+			 
+	 
+	public static void testCombinations() {
+			 
+			BigInteger bigInterval = new BigInteger(interval);
+			for (int it=0; it < 2 && foundKey==false; it++) {
 				 
 				 System.out.println("Min "+min.toString(10)+" Max "+max.toString(10));
 			
-				 decryptPlainTextBlock();
+				 combinationRange();
 				 
 				 min=max;
-				 max =max.add(new BigInteger(intervalStr));
-
-				
-
-				 
-				 if (interrupt == 2000) {
-					nanoSecs = System.nanoTime() - begin;
-					secs = nanoSecs / 1000000000;
-					mill = nanoSecs / 1000000;
-					System.out.println("\nTime elapsed . Secs ("+secs+") mill ("+mill+") nano ("+nanoSecs+")");
-					interrupt=0;
-				//	allPlainTexts.clear();
-			//		ReadAndWrite.writeFile(allPlainTexts);
-			//		interrupt = 0;
-				 }
-				 interrupt++;
-				}
-				
-			
-
-			  nanoSecs = System.nanoTime() - begin;
-			  secs = nanoSecs / 1000000000;
-			  mill = nanoSecs / 1000000;
-			 System.out.println("\nTime elapsed . Secs ("+secs+") mill ("+mill+") nano ("+nanoSecs+")");
-			 
-			 
-			 
-			 System.out.println("min : "+min.intValue());
-			 
-
-			 */
-				 
-		 }
+				 max =max.add(bigInterval);
+			}
+	}
 		 public static void getPlainTextBlock() {
 			 
 			 // Can't use byte, because in java it doesnt have 255 values (only 128)
@@ -171,7 +131,7 @@ import javax.crypto.spec.SecretKeySpec;
 					 
 					 System.out.println("Min "+min.toString(10)+" Max "+max.toString(10));
 				
-					 decryptPlainTextBlock();
+					 combinationRange();
 					 
 					 min=max;
 					 max =max.add(new BigInteger(interval));
