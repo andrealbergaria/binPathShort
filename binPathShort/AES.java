@@ -30,13 +30,6 @@ import javax.crypto.spec.SecretKeySpec;
 
 	 public class AES {
 		
-		 public static char[] plainText = {'a','b','c','a','b','c','a','b','c'};
-		 public static byte[] solved = {'a','b','c'};
-		 
-		 public static char[] str;
-		 public static int idx;
-		 
-		 public static byte[] abc = { 0x61,0x61,0x61}; //0x61,0x61,0x61,0x61,0x61,0x61};
 		 
 		 
 		 
@@ -52,70 +45,36 @@ import javax.crypto.spec.SecretKeySpec;
 		 
 		 
 		 public static void main(String[] args) {
-		
+			 
 			 testCombinations();
 		 }
 		 	 
 		 
-		 public static void add() {
-			   // 0x7E is last printable character
-			   if (str[idx]==0x7E) {
-				   idx++;
-				   // first printable character
-				   str[idx]=0x20;
-
-			   }
-			   else
-				   str[idx]++;
-			   util.printArray("add", str);
-
-		   }
-			 
-		 
-		 public static void combinationRange() {
-
-	 
-
+		 public static void decryptPlainTextBlock(BigInteger minKey,BigInteger maxKey,boolean debug) {
 			 
 			 
-			 while (min.compareTo(max) < 0) {
-				 add();
-				 if (Arrays.equals(abc, solved)) {
-					 foundKey=true;
-					 return;
-				 }
+			 
+				//key is equal to characters
 				
-				
-				 min = min.add(BigInteger.ONE);
-			 }
+				 byte[] keyAsBytes;
 				 
-				 
-				 
-
-				
+				 while (minKey.compareTo(maxKey) < 0) {
 					
-
-				}
+					keyAsBytes = minKey.toByteArray();
+					
+			     	if (util.isAscii(keyAsBytes,false)) {
+			     		
+			     		allPlainTexts.add(keyAsBytes);
+			     		
+			     	}
+					minKey = minKey.add(BigInteger.ONE);
+				 }
 			 
-			 
-	 
-	public static void testCombinations() {
-			 
-			BigInteger bigInterval = new BigInteger(interval);
-			for (int it=0; it < 2 && foundKey==false; it++) {
-				 
-				 System.out.println("Min "+min.toString(10)+" Max "+max.toString(10));
 			
-				 combinationRange();
-				 
-				 min=max;
-				 max =max.add(bigInterval);
-			}
-	}
+		 }
+
 		 public static void getPlainTextBlock() {
 			 
-			 // Can't use byte, because in java it doesnt have 255 values (only 128)
-			 // 
 				
 				 String interval= "1572864";
 				 min = new BigInteger("0");

@@ -46,6 +46,27 @@ public class util {
 	
 	}
 
+	 public static void printArray(String arrayName,byte[] arr) {
+	  		
+ 		  
+		  System.out.println("---begin array ("+arrayName+")---");
+		  System.out.println("Array length : "+arr.length);
+
+		  System.out.println("[ ");
+		  for (int i=0; i < arr.length;i++) {
+			    byte temp = arr[i];
+			    	if (temp< 0x20 || temp > 0x7e)
+			    		System.out.print("!");
+			    	else
+			    		System.out.print(temp);
+			 
+		  }  
+		  System.out.print("\n]");
+		  
+	     	System.out.println("\n---end array ---");
+	}
+	
+	
 	  public static void printArray(String arrayName,char[] arr) {
   		
   		  
