@@ -66,7 +66,6 @@ import javax.crypto.spec.SecretKeySpec;
 				 
 				 //char[] t2 = { 'a','b'};
 				 while (min.compareTo(max) < 0) {
-					 System.out.println("MIN : "+min.toString()+ " MAX : "+max.toString());
 					 keyAsBytes = min.toString().toCharArray();
 					 //util.printArray("KEY",keyAsBytes);
 					 util.printArray("KEY",keyAsBytes);
@@ -99,11 +98,14 @@ import javax.crypto.spec.SecretKeySpec;
 			 
 		
 			 min = new BigInteger(abc);
-			 String intervalStr= "1572864";
-			 BigInteger t = min.add(new BigInteger(intervalStr));
+		//	 String intervalStr= "1572864";
+	//		 BigInteger t = new BigInteger(intervalStr);
 			 max = min.add(t);
-					 
+			System.out.println("min "+min.toString());
+			 //util.printArray("min",min.toString().toCharArray());
+			// util.printArray("max",max.toString().toCharArray());
 			 
+			 /*
 			 int interrupt=0;
 			 long nanoSecs=-1;
 			 long secs=-1;
@@ -147,7 +149,7 @@ import javax.crypto.spec.SecretKeySpec;
 			 System.out.println("min : "+min.intValue());
 			 
 
-			 
+			 */
 				 
 		 }
 		 public static void getPlainTextBlock() {
