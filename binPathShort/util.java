@@ -3,6 +3,7 @@ package binPathShort;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -28,7 +29,59 @@ import binPathShort.AES;
 
 public class util {
 
-	
+	 public static byte[] readCipherText(File f,boolean debug) {
+     	int len = (int) f.length();
+     	byte[] cipherText = new byte[len];
+     	
+     	try {
+    	 
+      if (!f.exists()) {
+     	 System.out.println("\nCan't read ciphertext "+f.getAbsolutePath()+", since file doesnt exists");
+     	 
+      	return null;
+      }
+      FileInputStream fis = new FileInputStream(f);
+      
+      int fileSize = (int) f.length();
+      
+      System.out.println("\nSize of cipher text file "+fileSize);
+      if (256 % fileSize != 0) {
+     	System.err.println("\n File size is not a mulitple of 256");
+      	System.exit(-1);
+      }
+      
+      int numBytesRead = 0;
+      
+      numBytesRead = fis.read(cipherText);
+      
+      if (numBytesRead  <= 0) {
+     	 System.err.println("Read returned error or zero");
+     	 System.exit(-1);
+      }
+      
+      else {
+
+     	 System.out.println("(readCypherText) Read "+numBytesRead+" from "+f.getAbsolutePath()+" fileSize "+f.length());
+      		if (256 % cipherText.length != 0) {
+      			System.err.println("\n Ciphertext not size of block");
+      			System.exit(-1);
+      		}
+      		if(numBytesRead % 2 != 0 ) {
+      			System.err.println("\n Didnt read the number of bytes from ciphertext");
+      			System.exit(-1);
+      		}
+      }
+      		fis.close();
+      		return cipherText;
+      }
+      catch(FileNotFoundException e) {
+      		e.printStackTrace();
+     }
+     	catch(IOException e) {
+     		e.printStackTrace();
+     	}
+     	return cipherText;
+     }
 	public static void printAllPlaintexts() {
 	
 	int index = 0;

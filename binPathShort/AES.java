@@ -33,80 +33,154 @@ import javax.crypto.spec.SecretKeySpec;
 		 
 		 
 		 
-		 public static String interval = "279841"; // (( 23 ^4))
-		 
 		 public static BigInteger min;
 		 public static BigInteger max;
-		 
+			public static File cipherFile = new File("/home/andrec/workspace_3_8/binPathShort/files/ciphertext1");
+
 		 public static boolean foundKey=false;
 		 public static String plainTextsPath = "/home/andrec/workspace_3_8/binPathShort/plainTexts";
 		 public static String logFilePath = "/home/andrec/workspace_3_8/binPathShort/limits";
 		 public static ArrayList<char[]> allPlainTexts = new ArrayList();
+		 public static char[] solved= { 'a' ,'b','c'};
 		 
-		 
-		 public static void main(String[] args) {
-			 
-			 testCombinations();
-		 }
-		 	 
-		 
-		 public static void decryptPlainTextBlock(BigInteger minKey,BigInteger maxKey,boolean debug) {
-			 
-			 
-			 
-				//key is equal to characters
+public static byte[] decrypt(byte[] cipherText,SecretKeySpec sks,boolean debug) {
+        	 
+	    	 try {
+	        	if (debug==true)
+	        	System.out.println("\n([decrypt] Decrypting...");
+	        
+	        byte[] iv = new byte[16];
+	  		Cipher cipher;
+	  		IvParameterSpec ivspec = new IvParameterSpec(iv);
+	  		cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
+	  		
+	        	 
+	        cipher.init(Cipher.DECRYPT_MODE, sks, ivspec);
+	        
+		     
+		      
+	        byte[] decrypt =cipher.doFinal(cipherText);
+	        	 return decrypt;	
+	        	 	
+        	}
+	        catch(BadPaddingException e) {
+	        	if (debug==true)
+	        	System.out.println("\n[decrypt] Bad padding");
+	        	
+	        }
+	  		catch (IllegalBlockSizeException e) {
+	  			
+	  			System.out.println("\nIllegal Block");
+            } catch (NoSuchAlgorithmException e) {
 				
-				 byte[] keyAsBytes;
-				 
-				 while (minKey.compareTo(maxKey) < 0) {
-					
-					keyAsBytes = minKey.toByteArray();
-					
-			     	if (util.isAscii(keyAsBytes,false)) {
-			     		
-			     		allPlainTexts.add(keyAsBytes);
-			     		
-			     	}
-					minKey = minKey.add(BigInteger.ONE);
-				 }
-			 
-			
+				System.out.println("\n[Exception] No such alg");
+				
+				
+				
+			} catch (NoSuchPaddingException e) {
+				
+				System.out.println("\n[Exception] No such padding");
+			} catch (InvalidKeyException e) {
+				
+				System.out.println("\n[Exception] Invalid Key");
+				
+			} catch (InvalidAlgorithmParameterException e) {
+				
+				
+				System.out.println("\n[Exception] invalid alg");
+			}
+           	
+	    	 return null;
+		           
+	          
+	        
+	        
+	    }
+		 
+		 public static void tryKey()  {
+
+		 char[] keyAsBytes;
+		                                 
+		                                 //char[] t2 = { 'a','b'};
+		                                 while (min.compareTo(max) < 0) {
+		                                         keyAsBytes = min.toString().toCharArray();
+		                                         foundKey = Arrays.equals(keyAsBytes, solved);
+		                                        
+		                                         if (foundKey == true) 
+		                                                 return;
+		                                        min = min.add(BigInteger.ONE);
+		                             
+		                                 }
 		 }
 
-		 public static void getPlainTextBlock() {
-			 
-				
-				 String interval= "1572864";
+		 //https://stackoverflow.com/questions/8377050/how-do-i-determine-number-of-bytes-needed-to-represent-a-given-integer
+		 public static int bytesSize(BigInteger val) {
+			    int size = 0;
+			    BigInteger comp = new BigInteger("0");
+			    BigInteger shift;
+
+			    while(val.compareTo(comp) > 0) {
+			    	shift = val.shiftRight(8);
+			        size++;
+			    }
+			    return size;
+			}
+		 
+
+		 public static void getKey() {
+//			 Integer max value 2147483647
+//			 Short max value 32767
+//			 Long max 9223372036854775807
+
+			 	// two bytes *
+			 String interval = "65536";
+				long k = (long)Math.pow(1.407374884,14); //(k == (max_long / 65336))
+				 String maxIterator = String.valueOf(k); // (65536*2)
+				 BigInteger bigI = new BigInteger(maxIterator);
 				 min = new BigInteger("0");
 				 max = new BigInteger(interval);
+				 
 				 // o numero de elementos dum conjunto é o max valor
-				 int interrupt=0;
 				 long nanoSecs=-1;
 				 long secs=-1;
 				 long mill=-1;
 				 long begin = System.nanoTime();
+				 
+				 
 				 // if i = 125*
-				 for (int it=0; it < 2 && foundKey==false; it++) {
-					 
-					 System.out.println("Min "+min.toString(10)+" Max "+max.toString(10));
-				
-					 combinationRange();
+				 //for (; k > 0 && foundKey==false; k++) {
+				 for (int it=0; it <  65536; it++) {
+					 tryKey();
+					 int a = bytesSize(min);
+					 int b = bytesSize(max);
+					 System.out.println("Min "+min+" Bytes : "+a);
+					 System.out.println("Max "+max+" Bytes : "+b);
+					  
 					 
 					 min=max;
 					 max =max.add(new BigInteger(interval));
-
-					
-
 					 
-					 if (interrupt == 2000) {
+					 nanoSecs = System.nanoTime() - begin;
+						secs = nanoSecs / 1000000000;
+						mill = nanoSecs / 1000000;
+						System.out.println("\nTime elapsed . Secs ("+secs+") mill ("+mill+") nano ("+nanoSecs+")");
+					 
+
+				 }
+					
+					 //System.out.println("Min "+min.toString(10)+" Max "+max.toString(10));
+				
+					 //tryKey();
+					 
+				//	 min=max;
+			//		 max =max.add(new BigInteger(interval));
+
+					/* if (interrupt == 2000) {
 						nanoSecs = System.nanoTime() - begin;
 						secs = nanoSecs / 1000000000;
 						mill = nanoSecs / 1000000;
 						System.out.println("\nTime elapsed . Secs ("+secs+") mill ("+mill+") nano ("+nanoSecs+")");
 						interrupt=0;
-					//	allPlainTexts.clear();
-				//		ReadAndWrite.writeFile(allPlainTexts);
-				//		interrupt = 0;
 					 }
 					 interrupt++;
 					}
@@ -117,7 +191,7 @@ import javax.crypto.spec.SecretKeySpec;
 				  secs = nanoSecs / 1000000000;
 				  mill = nanoSecs / 1000000;
 				 System.out.println("\nTime elapsed . Secs ("+secs+") mill ("+mill+") nano ("+nanoSecs+")");
-				 
+				 */
 				/*  if (allPlainTexts != null && !allPlainTexts.isEmpty()) {
 					  // write file lot faster than print it and use bash commands
 					  ReadAndWrite.writeFile(allPlainTexts);
@@ -127,6 +201,8 @@ import javax.crypto.spec.SecretKeySpec;
 					 */
 			
 		 }
+	 }
+		 
 		 
 			
 		 
@@ -135,4 +211,4 @@ import javax.crypto.spec.SecretKeySpec;
          	 
          
          
-	 }
+		 
