@@ -19,7 +19,7 @@ public class binPathShort {
 		System.out.println("Character " +Character.MAX_VALUE*2);
 		System.out.println("Short " +Short.MAX_VALUE*2);
 		System.out.println("Integer "+(long)Integer.MAX_VALUE*2);
-		System.out.println("Long  "+Long.MAX_VALUE*2);
+		System.out.println("Long  "+Long.MAX_VALUE);
 		
 		
 			
@@ -39,12 +39,12 @@ public class binPathShort {
 				*/
 				
 				
-				AES.tryCorrectKey();
 				
-				String interval = "8388608"; //65536*128
-				BigInteger min = new BigInteger("0");
-				BigInteger max = new BigInteger(interval);
-				//AES.getKey(interval,min,max);
+				
+				long interval = 8388608; //65536*128
+				long min = 0;
+				long max = interval;
+				AES.getKey(min,max,interval);
 				
 				
 			} catch (IOException e) {

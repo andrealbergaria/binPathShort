@@ -10,7 +10,7 @@ public class SecretKeyValues extends SecretKeySpec {
 	public SecretKeyValues(byte[] key, String algorithm) {
 		super(key,algorithm);
        
-        
+        this.algorithm=algorithm;
 		
 		
         if (algorithm.equals("AES")) { 
@@ -26,6 +26,39 @@ public class SecretKeyValues extends SecretKeySpec {
         
     }
 	
+	public String detailedString() {
+		String r1 = "key algorithm = "+algorithm+"\n";
+		String r2 = "key length "+key.length+"\n[";
+		String r3 = new String();
+		byte[] kArray = this.getEncoded();
+		
+		for (int i=0; i < kArray.length ; i++) {
+			r3+=" "+key[i]+",";
+		}
+		String r4 = "]";
+		String r= r1+r2+r3+r4;
+		return r;
+	}
+	
+	public String toString() {
+		String retValue = new String();
+		byte[] kArray = this.getEncoded();
+		retValue = "[SecretKeyValues.toString()] size : "+kArray.length;
+		retValue += "[ ";
+		
+		
+		
+		for (int i=0; i < kArray.length; i++) {
+			
+			if (i != kArray.length-1)
+			retValue += kArray[i] + ",";
+			else
+			retValue += kArray[i];
+		}
+		retValue +=" ]\n";
+		retValue += "[SecretKeyValues.toString()] end";
+		return retValue;
+	}
 	 /**
      * Returns the key material of this secret key.
      *

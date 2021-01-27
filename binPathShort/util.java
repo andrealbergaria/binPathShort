@@ -29,6 +29,23 @@ import binPathShort.AES;
 
 public class util {
 
+	
+	//https://stackoverflow.com/questions/4485128/how-do-i-convert-long-to-byte-and-back-in-java
+	public static byte[] longToBytes(long[] keys) {
+	    byte[] result = new byte[keys.length*8];
+	    int idx =0;
+	    for (long l : keys) {
+	    	for (int i = 0+idx; i <= 7+idx; i++)  {
+	    		result[i] = (byte)(l & 0xFF);
+	    		l >>= 8;
+	    	}
+	    	idx+=8;
+	    }
+	    return result;
+	}
+	
+	
+	
 	 public static boolean isAscii(byte[] keyToBeTested) {
   	   
 		 
@@ -57,7 +74,7 @@ public class util {
       
       int fileSize = (int) f.length();
       
-      System.out.println("\nSize of cipher text file "+fileSize);
+      
       if (256 % fileSize != 0) {
      	System.err.println("\n File size is not a mulitple of 256");
       	System.exit(-1);
@@ -75,7 +92,7 @@ public class util {
       
       else {
 
-     	 System.out.println("(readCypherText) Read "+numBytesRead+" from "+f.getAbsolutePath()+" fileSize "+f.length());
+     	 System.out.println("[util.readCypherText] Read "+numBytesRead+" from "+f.getAbsolutePath()+" fileSize "+f.length());
       		if (256 % cipherText.length != 0) {
       			System.err.println("\n Ciphertext not size of block");
       			System.exit(-1);
@@ -116,18 +133,21 @@ public class util {
 	 public static void printArray(String arrayName,byte[] arr) {
 	  		
  		  
-		  System.out.println("---begin array ("+arrayName+")---");
-		  System.out.println("Array length : "+arr.length);
-
-		  System.out.println("[ ");
-		  for (int i=0; i < arr.length;i++) {
-			    byte temp = arr[i];
-			    		System.out.print(temp);
-			 
-		  }  
-		  System.out.print("\n]");
+		  System.out.println("[util.printArray] size : "+arr.length);
 		  
-	     	System.out.println("\n---end array ---");
+		  
+
+		  System.out.print("[ ");
+		  for (int i=0; i < arr.length;i++) {
+			    int temp = arr[i] & 0xFF;
+			    if (i == arr.length-1)
+			    		System.out.print(temp);
+			    else
+			    	System.out.print(temp + ",");
+		  }  
+		  System.out.println(" ]\n[util.printArray] Finished Array");
+		  
+		  
 	}
 	
 	

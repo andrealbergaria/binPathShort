@@ -43,7 +43,7 @@ import javax.crypto.spec.SecretKeySpec;
 		 
 		 
 		 
-public static byte[] decrypt(byte[] cipherText,SecretKeyValues skv,byte[] iv) throws WrongKeyException {
+public static byte[] decrypt(byte[] cipherText,SecretKeyValues skv,byte[] iv)  {
         	 byte[] buf = null;
 	    	 try {
 	    		 
@@ -54,19 +54,19 @@ public static byte[] decrypt(byte[] cipherText,SecretKeyValues skv,byte[] iv) th
 	  		
 	        
 	        cipher.init(Cipher.DECRYPT_MODE, skv, ivspec);
+	        
 	        buf =cipher.doFinal(cipherText);
-	        	
-	        	 
-	        	 	
-        	}
-	    	 catch(InvalidKeyException e) {
-	    		 util.printArray("Invalid_Key ",buf);
-	    		 
 	    	 }
 	        catch(BadPaddingException e) {
+	        	System.out.println(skv);
 	        	e.printStackTrace();
-	        	
 	        }
+	        	
+	        catch(InvalidKeyException e) {
+	    		 e.printStackTrace();
+	    		 
+	    	 }
+	        
 	  		catch (IllegalBlockSizeException e) {
 	  			
 	  			e.printStackTrace();
@@ -120,15 +120,16 @@ public static byte[] decrypt(byte[] cipherText,SecretKeyValues skv,byte[] iv) th
 			 }
 			 
 		 }
-		 public static void tryKey(byte[] cipherText,BigInteger min,BigInteger max) throws Exception  {
+		 public static void tryKey(byte[] cipherText,long min,long max) throws Exception  {
 
-			 							//byte[] keyAsBytes;
-			 						byte[] keyAsBytes = new byte[32];
-			 						Arrays.fill(keyAsBytes, 0,30,(byte)0);
-			 						Arrays.fill(keyAsBytes,30,32,(byte)0x61);
+			 						    long[] keys = new long[4];
 			 						
+			 						    keys[0] = min;
+			 						    keys[1] = 0;
+			 						    keys[2] = 0;
+			 						    keys[3] = 0;
 			 						    
-			 						SecretKeyValues skv;
+			 						    SecretKeyValues skv;
 		                                 byte[] tempPlainText;
 		                                 
 		                    			 byte[] iv = new byte[16];
@@ -138,20 +139,17 @@ public static byte[] decrypt(byte[] cipherText,SecretKeyValues skv,byte[] iv) th
 		                    			 iv[1] =0x61;
 		                    			 iv[2] = 0x61;
 		                    			 
-		                                 try {
-		                                 while (min.compareTo(max) < 0) {
-		                                         keyAsBytes = min.toByteArray();
+		                                
+		                                 while (min <= max) {
+		                                         byte[] keyAsBytes = util.longToBytes(keys);
+		                                         util.printArray("KeyAsBytes",keyAsBytes);
 		                                         skv = new SecretKeyValues(keyAsBytes, "AES");
-		                                         
+		                                         System.out.println(skv);
 		                                        tempPlainText = decrypt(cipherText,skv, iv);
 		                                        if ( util.isAscii(tempPlainText) == true)
 		                                        		System.out.println(new String(tempPlainText));
-		                                        min = min.add(BigInteger.ONE);
+		                                        min++;
 		                                 }
-		                                 }
-		                                 catch(Exception e) {
-		                                	throw e;
-		                                 }	 
 		                                 
 		                                 
 		                            }
@@ -159,7 +157,7 @@ public static byte[] decrypt(byte[] cipherText,SecretKeyValues skv,byte[] iv) th
 
 		 
 
-		 public static void getKey(String interval,BigInteger minP,BigInteger maxP) {
+		 public static void getKey(long min,long max,long interval) {
 //			 Integer max value 2147483647
 //			 Short max value 32767
 //			 Long max 9223372036854775807
@@ -168,15 +166,10 @@ public static byte[] decrypt(byte[] cipherText,SecretKeyValues skv,byte[] iv) th
 			 
 			 byte[] cipherText = util.readCipherText(AES.cipherFile,false);
 			 
-			 	if (interval == null || minP == null || maxP == null) {
-			 		throw new IllegalArgumentException();
-			 	}
 			 	// two bytes *
 			 	long k = (long)Math.pow(1.407374884,14); //(k == (max_long / 65336))
 				 
-			    BigInteger min = minP;
-				 BigInteger max = maxP;
-				 
+			     
 				 // o numero de elementos dum conjunto é o max valor
 				 long nanoSecs=-1;
 				 long secs=-1;
@@ -199,8 +192,8 @@ public static byte[] decrypt(byte[] cipherText,SecretKeyValues skv,byte[] iv) th
 							    
 					  
 					 
-					 min = new BigInteger(max.toString());
-					 max =max.add(new BigInteger(interval));
+					 min = max;
+					 max += interval;
 					 
 					 nanoSecs = System.nanoTime() - begin;
 						secs = nanoSecs / 1000000000;
@@ -248,15 +241,14 @@ public static byte[] decrypt(byte[] cipherText,SecretKeyValues skv,byte[] iv) th
 		 }
 		 
 		 //https://stackoverflow.com/questions/8377050/how-do-i-determine-number-of-bytes-needed-to-represent-a-given-integer
-		 public static int bytesSize(BigInteger val) {
+		 public static int bytesSize(long val) {
 			    int size = 0;
 			    
-			    BigInteger shift;
+			    
 
-			    while(val.compareTo(BigInteger.ZERO) > 0) {
-			    	shift = val.shiftRight(8);
-			    	val = shift;
-			        size++;
+			    while(val > 0) {
+			    	val >>= 8;
+			    	size++;
 			    }
 			    return size;
 			}
