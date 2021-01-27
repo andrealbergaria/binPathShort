@@ -30,7 +30,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 	 public class AES {
 		
-		 System.arraycopy
+		 
 		 
 		 
 		 	public static File cipherFile = new File("/home/andrec/workspace_3_8/binPathShort/files/cipherText");
@@ -53,7 +53,7 @@ public static byte[] decrypt(byte[] cipherText,SecretKeySpec sks,boolean debug) 
 	  		IvParameterSpec ivspec = new IvParameterSpec(iv);
 	  		cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
 	  		System.out.println("cypher len : "+cipherText.length);
-	  		System.out.println("\nSize Key " +sks.getEncoded().length;
+	  		System.out.println("\nSize Key " +sks.getEncoded().length);
 	  		
 	        
 	        cipher.init(Cipher.DECRYPT_MODE, sks, ivspec);
@@ -103,17 +103,16 @@ public static byte[] decrypt(byte[] cipherText,SecretKeySpec sks,boolean debug) 
 			 						Arrays.fill(keyAsBytes, 0,30,(byte)0);
 			 						Arrays.fill(keyAsBytes,30,32,(byte)0x61);
 			 						
-			 						System.arraycopy(keyAsBytes,0,keyAsBytes,0,12);
 			 						    
-			 						SecretKeySpec sks;
+			 						SecretKeyValues skv;
 		                                 byte[] tempPlainText;
-		                                 //char[] t2 = { 'a','b'};
+
 		                                 try {
 		                                 while (min.compareTo(max) < 0) {
 		                            //             keyAsBytes = min.toByteArray();
-		                                         sks = new SecretKeySpec(keyAsBytes, "AES");
+		                                         skv = new SecretKeyValues(keyAsBytes, "AES");
 		                                         
-		                                        tempPlainText = decrypt(cipherText,sks, false);
+		                                        tempPlainText = decrypt(cipherText,skv, false);
 		                                        if ( util.isAscii(tempPlainText) == true)
 		                                        		System.out.println(new String(tempPlainText));
 		                                        min = min.add(BigInteger.ONE);
@@ -133,7 +132,7 @@ public static byte[] decrypt(byte[] cipherText,SecretKeySpec sks,boolean debug) 
 //			 Integer max value 2147483647
 //			 Short max value 32767
 //			 Long max 9223372036854775807
-			 FileOutputStream
+			 
 			 try {
 			 
 			 byte[] cipherText = util.readCipherText(AES.cipherFile,false);

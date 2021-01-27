@@ -6,6 +6,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigInteger;
 
+import javax.crypto.spec.SecretKeySpec;
+
 public class binPathShort {
 
 	/**

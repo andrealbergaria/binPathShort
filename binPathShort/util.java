@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.RandomAccess;
 
-import com.sun.corba.se.impl.ior.ByteBuffer;
+
 
 import binPathShort.util;
 import binPathShort.AES;
@@ -71,6 +71,7 @@ public class util {
      	 System.err.println("Read returned error or zero");
      	 System.exit(-1);
       }
+      
       
       else {
 
