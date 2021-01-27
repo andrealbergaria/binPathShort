@@ -29,6 +29,19 @@ import binPathShort.AES;
 
 public class util {
 
+	 public static boolean isAscii(byte[] keyToBeTested) {
+  	   
+		 
+     		 for (byte b: keyToBeTested) {
+     			 if ( b > 0x7f | b <=0x20) {
+     							return false;
+     				}
+     		 }
+     		
+         return true;
+   	 
+     }
+	
 	 public static byte[] readCipherText(File f,boolean debug) {
      	int len = (int) f.length();
      	byte[] cipherText = new byte[len];
@@ -108,9 +121,6 @@ public class util {
 		  System.out.println("[ ");
 		  for (int i=0; i < arr.length;i++) {
 			    byte temp = arr[i];
-			    	if (temp< 0x20 || temp > 0x7e)
-			    		System.out.print("!");
-			    	else
 			    		System.out.print(temp);
 			 
 		  }  
