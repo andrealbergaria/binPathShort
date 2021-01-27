@@ -43,59 +43,83 @@ import javax.crypto.spec.SecretKeySpec;
 		 
 		 
 		 
-public static byte[] decrypt(byte[] cipherText,SecretKeySpec sks,boolean debug) throws Exception {
-        	 
+public static byte[] decrypt(byte[] cipherText,SecretKeyValues skv,byte[] iv) throws WrongKeyException {
+        	 byte[] buf = null;
 	    	 try {
+	    		 
 	       // 	util.printArray("KEY",sks.getEncoded());
-	        
-	        byte[] iv = new byte[16];
-	  		Cipher cipher;
+	        Cipher cipher;
 	  		IvParameterSpec ivspec = new IvParameterSpec(iv);
 	  		cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
-	  		System.out.println("cypher len : "+cipherText.length);
-	  		System.out.println("\nSize Key " +sks.getEncoded().length);
 	  		
 	        
-	        cipher.init(Cipher.DECRYPT_MODE, sks, ivspec);
-	        
-		     System.out.println("\nCipherText len  "+cipherText.length);
-	        byte[] decrypt =cipher.doFinal(cipherText);
+	        cipher.init(Cipher.DECRYPT_MODE, skv, ivspec);
+	        buf =cipher.doFinal(cipherText);
 	        	
-	        	 return decrypt;
+	        	 
 	        	 	
         	}
+	    	 catch(InvalidKeyException e) {
+	    		 util.printArray("Invalid_Key ",buf);
+	    		 
+	    	 }
 	        catch(BadPaddingException e) {
-	        	throw new Exception(e);
+	        	e.printStackTrace();
 	        	
 	        }
 	  		catch (IllegalBlockSizeException e) {
 	  			
-	  			throw new Exception(e);
+	  			e.printStackTrace();
             } catch (NoSuchAlgorithmException e) {
 				
-            	throw new Exception(e);
+            	e.printStackTrace();
 				
 				
 				
 			} catch (NoSuchPaddingException e) {
 				
-				throw new Exception(e);
-			} catch (InvalidKeyException e) {
-				
-				throw new Exception(e);
-				
-			} catch (InvalidAlgorithmParameterException e) {
-				throw new Exception(e);	
-				
-				
+				e.printStackTrace();
+			} 
+	    	 catch (InvalidAlgorithmParameterException e) {
+	    		 e.printStackTrace();	
 			}
            	
 	    	 		           
-	          
+	    	 return buf;
 	        
 	        
 	    }
-		 
+		 public static void tryCorrectKey() {
+			 try {
+				 
+				 byte[] cipherText = util.readCipherText(AES.cipherFile, false);
+				 
+			 byte[] key = new byte[32];
+             
+
+			 key[0] =0x61;
+			 key[1] = 0x61;
+			 key[2] = 0x61;
+			 
+			 byte[] iv = new byte[16];
+			 
+			 iv[0] = 0x61;
+			 iv[1] =0x61;
+			 iv[2] = 0x61;
+			 
+				SecretKeyValues skv;
+				skv = new SecretKeyValues(key, "AES");
+				byte[] temp = decrypt(cipherText, skv,iv);
+				
+				 if ( util.isAscii(temp) == true)
+                 		System.out.println(new String(temp));
+				 
+			 }
+			 catch(Exception e) {
+				 e.printStackTrace();
+			 }
+			 
+		 }
 		 public static void tryKey(byte[] cipherText,BigInteger min,BigInteger max) throws Exception  {
 
 			 							//byte[] keyAsBytes;
@@ -106,13 +130,20 @@ public static byte[] decrypt(byte[] cipherText,SecretKeySpec sks,boolean debug) 
 			 						    
 			 						SecretKeyValues skv;
 		                                 byte[] tempPlainText;
+		                                 
+		                    			 byte[] iv = new byte[16];
 
+		                                 
+		                                 iv[0] = 0x61;
+		                    			 iv[1] =0x61;
+		                    			 iv[2] = 0x61;
+		                    			 
 		                                 try {
 		                                 while (min.compareTo(max) < 0) {
-		                            //             keyAsBytes = min.toByteArray();
+		                                         keyAsBytes = min.toByteArray();
 		                                         skv = new SecretKeyValues(keyAsBytes, "AES");
 		                                         
-		                                        tempPlainText = decrypt(cipherText,skv, false);
+		                                        tempPlainText = decrypt(cipherText,skv, iv);
 		                                        if ( util.isAscii(tempPlainText) == true)
 		                                        		System.out.println(new String(tempPlainText));
 		                                        min = min.add(BigInteger.ONE);

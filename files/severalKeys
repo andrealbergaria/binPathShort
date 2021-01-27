@@ -1,8 +1,0 @@
-K comes in hexa , iv as wel, -P prints salt,iv,key
-openssl enc -aes-256-cbc -in plainText -p -K 6161 -iv 0 -out cipherText
-salt=188DADBFA58E2EB7
-key=6161616100000000000000000000000000000000000000000000000000000000
-iv =00000000000000000000000000000000
-
-
-openssl enc -d -aes-256-cbc -in cipherText -K 61616161 -iv 0 -out plainText

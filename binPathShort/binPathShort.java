@@ -39,10 +39,12 @@ public class binPathShort {
 				*/
 				
 				
+				AES.tryCorrectKey();
+				
 				String interval = "8388608"; //65536*128
 				BigInteger min = new BigInteger("0");
 				BigInteger max = new BigInteger(interval);
-				AES.getKey(interval,min,max);
+				//AES.getKey(interval,min,max);
 				
 				
 			} catch (IOException e) {

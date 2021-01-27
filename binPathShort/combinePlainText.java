@@ -45,8 +45,8 @@ public class combinePlainText {
 	public static void add() {
 		 if (idx > abc.length-1) {
 			 try {
-				throw new IndexLargerThanArrayLengthException();
-			} catch (IndexLargerThanArrayLengthException e) {
+				throw new IndexOutOfBoundsException();
+			} catch (IndexOutOfBoundsException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -55,8 +55,8 @@ public class combinePlainText {
 		   if (abc[idx]==0x7E) {
 			   idx++;
 			   try {
-					throw new IndexLargerThanArrayLengthException();
-				} catch (IndexLargerThanArrayLengthException e) {
+					throw new IndexOutOfBoundsException();
+				} catch (IndexOutOfBoundsException e) {
 					// TODO Auto-generated catch block
 					System.out.println("\nFinished testing. (number of sequences checked) "+idx);
 				}
