@@ -1,8 +1,10 @@
 package binPathShort;
 
 import java.io.*;
+
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.nio.LongBuffer;
 import java.nio.charset.Charset;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -25,6 +27,8 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
+ 
+
 
 
 
@@ -43,8 +47,12 @@ import javax.crypto.spec.SecretKeySpec;
 		 
 		 
 		 
-public static byte[] decrypt(byte[] cipherText,SecretKeyValues skv,byte[] iv)  {
-        	 byte[] buf = null;
+public static byte[] decrypt(byte[] cipherText,SecretKeySpec skv,byte[] iv)  {
+        	 
+		
+			
+		
+			byte[] buf = null;
 	    	 try {
 	    		 
 	       // 	util.printArray("KEY",sks.getEncoded());
@@ -53,13 +61,12 @@ public static byte[] decrypt(byte[] cipherText,SecretKeyValues skv,byte[] iv)  {
 	  		cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
 	  		
 	        
-	        cipher.init(Cipher.DECRYPT_MODE, skv, ivspec);
+	        cipher.init(Cipher.DECRYPT_MODE, skv);
 	        
 	        buf =cipher.doFinal(cipherText);
 	    	 }
 	        catch(BadPaddingException e) {
-	        	System.out.println(skv);
-	        	e.printStackTrace();
+	        	System.out.println("[AES.BadPaddingException] Invalid key ");
 	        }
 	        	
 	        catch(InvalidKeyException e) {
@@ -107,48 +114,59 @@ public static byte[] decrypt(byte[] cipherText,SecretKeyValues skv,byte[] iv)  {
 			 iv[1] =0x61;
 			 iv[2] = 0x61;
 			 
-				SecretKeyValues skv;
-				skv = new SecretKeyValues(key, "AES");
-				byte[] temp = decrypt(cipherText, skv,iv);
+				SecretKeySpec sk;
+				sk = new SecretKeySpec(key, "AES");
+				byte[] temp = decrypt(cipherText, sk,iv);
 				
 				 if ( util.isAscii(temp) == true)
                  		System.out.println(new String(temp));
-				 
+				util.printArray("[AES.tryCorrectKey]","Decrypt correct", key);
 			 }
 			 catch(Exception e) {
 				 e.printStackTrace();
 			 }
 			 
 		 }
-		 public static void tryKey(byte[] cipherText,long min,long max) throws Exception  {
+		 
+		
+          public static byte[] getIV() {
+        	  byte[] iv = new byte[] {0x61,0x61,0x61,0};
+        	  return iv;
+          }
 
-			 						    long[] keys = new long[4];
-			 						
-			 						    keys[0] = min;
-			 						    keys[1] = 0;
-			 						    keys[2] = 0;
-			 						    keys[3] = 0;
+		 
+		 public static void tryKey(byte[] secondBlockCipherText,long min,long max) throws Exception  {
+
+			 /*
+			  * 
+			  * On CBC mode, we can't get block1 (because of IV), so we try our key with the 2block
+			  * and then try to retrieve the key.
+			  *long[] keys = new long[4]; This will be required on tsting 32 bytes 
+			  *
+			  */
+			 						 
 			 						    
-			 						    SecretKeyValues skv;
-		                                 byte[] tempPlainText;
-		                                 
-		                    			 byte[] iv = new byte[16];
-
-		                                 
-		                                 iv[0] = 0x61;
-		                    			 iv[1] =0x61;
-		                    			 iv[2] = 0x61;
-		                    			 
+			 						    SecretKeySpec sk;
+		                                byte[] tempPlainText;
 		                                
+		                                 byte[] key = new byte[8];
+		                                 
 		                                 while (min <= max) {
-		                                         byte[] keyAsBytes = util.longToBytes(keys);
-		                                         util.printArray("KeyAsBytes",keyAsBytes);
-		                                         skv = new SecretKeyValues(keyAsBytes, "AES");
-		                                         System.out.println(skv);
-		                                        tempPlainText = decrypt(cipherText,skv, iv);
-		                                        if ( util.isAscii(tempPlainText) == true)
+		                                	 	 key = util.longToBytes(min);
+		                                         sk = new SecretKeySpec(key, "AES");
+		                                         util.printArray("[AES.trykey]","KeySpec",key);
+		                                       
+		                                         // Return BadPaddingException
+		                                   //     tempPlainText = decrypt(secondBlockCipherText,sk);
+		                                        if (tempPlainText == null) {
+		                                        	System.out.println("\nKey doesnt decrypt cipherText");
+		                                        }
+		                                        else
+		                                        	if ( util.isAscii(tempPlainText) == true)
 		                                        		System.out.println(new String(tempPlainText));
 		                                        min++;
+		                                        
+		                                        
 		                                 }
 		                                 
 		                                 
@@ -169,6 +187,10 @@ public static byte[] decrypt(byte[] cipherText,SecretKeyValues skv,byte[] iv)  {
 			 	// two bytes *
 			 	long k = (long)Math.pow(1.407374884,14); //(k == (max_long / 65336))
 				 
+			     if (interval % 2 != 0) {
+			    	 System.err.println("\nInterval not multiple of "+interval+"... exiting");
+			     	System.exit(-1);
+			     }
 			     
 				 // o numero de elementos dum conjunto é o max valor
 				 long nanoSecs=-1;
@@ -180,7 +202,6 @@ public static byte[] decrypt(byte[] cipherText,SecretKeyValues skv,byte[] iv)  {
 				 // if i = 125*
 				 //for (; k > 0 && foundKey==false; k++) {
 				 for (int it=0; it <  1; it++) {
-					 
 					 tryKey(cipherText,min,max);
 					 int a = bytesSize(min);
 					 int b = bytesSize(max);

@@ -31,7 +31,7 @@ public class util {
 
 	
 	//https://stackoverflow.com/questions/4485128/how-do-i-convert-long-to-byte-and-back-in-java
-	public static byte[] longToBytes(long[] keys) {
+	public static byte[] severallongsToBytes(long[] keys) {
 	    byte[] result = new byte[keys.length*8];
 	    int idx =0;
 	    for (long l : keys) {
@@ -44,7 +44,14 @@ public class util {
 	    return result;
 	}
 	
-	
+	public static byte[] longToBytes(long l) {
+	    byte[] result = new byte[8];
+	    for (int i = 7; i >= 0; i--) {
+	        result[i] = (byte)(l & 0xFF);
+	        l >>= 8;
+	    }
+	    return result;
+	}
 	
 	 public static boolean isAscii(byte[] keyToBeTested) {
   	   
@@ -130,10 +137,10 @@ public class util {
 	
 	}
 
-	 public static void printArray(String arrayName,byte[] arr) {
+	 public static void printArray(String method,String arrayName,byte[] arr) {
 	  		
  		  
-		  System.out.println("[util.printArray] size : "+arr.length);
+		  System.out.println(method+" size : "+arr.length);
 		  
 		  
 
