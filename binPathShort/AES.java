@@ -34,6 +34,8 @@ import javax.crypto.spec.SecretKeySpec;
 
 	 public class AES {
 		
+		 public static int numOfBlocksToDecipher = 2;
+		 public static int sizeOfBlocks = 16;
 		 
 		 
 		 
@@ -58,15 +60,16 @@ public static byte[] decrypt(byte[] cipherText,SecretKeySpec skv,byte[] iv)  {
 	       // 	util.printArray("KEY",sks.getEncoded());
 	        Cipher cipher;
 	  		IvParameterSpec ivspec = new IvParameterSpec(iv);
-	  		cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
+	  		//cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
+	  		cipher = Cipher.getInstance("AES/CBC/NOPADDING");
 	  		
 	        
-	        cipher.init(Cipher.DECRYPT_MODE, skv);
-	        
+	        cipher.init(Cipher.DECRYPT_MODE, skv,ivspec);
+	        System.out.println("[AES. decrypt()] cipherText buffer length "+cipherText.length);
 	        buf =cipher.doFinal(cipherText);
 	    	 }
 	        catch(BadPaddingException e) {
-	        	System.out.println("[AES.BadPaddingException] Invalid key ");
+	        	System.out.println("[AES.decrypt(). BadPaddingException] Invalid key ");
 	        }
 	        	
 	        catch(InvalidKeyException e) {
@@ -86,11 +89,11 @@ public static byte[] decrypt(byte[] cipherText,SecretKeySpec skv,byte[] iv)  {
 			} catch (NoSuchPaddingException e) {
 				
 				e.printStackTrace();
+			} catch (InvalidAlgorithmParameterException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			} 
-	    	 catch (InvalidAlgorithmParameterException e) {
-	    		 e.printStackTrace();	
-			}
-           	
+	    	 
 	    	 		           
 	    	 return buf;
 	        
@@ -99,7 +102,7 @@ public static byte[] decrypt(byte[] cipherText,SecretKeySpec skv,byte[] iv)  {
 		 public static void tryCorrectKey() {
 			 try {
 				 
-				 byte[] cipherText = util.readCipherText(AES.cipherFile, false);
+				 byte[][] cipherText = util.readCipherText(AES.cipherFile, false);
 				 
 			 byte[] key = new byte[32];
              
@@ -111,16 +114,28 @@ public static byte[] decrypt(byte[] cipherText,SecretKeySpec skv,byte[] iv)  {
 			 byte[] iv = new byte[16];
 			 
 			 iv[0] = 0x61;
-			 iv[1] =0x61;
-			 iv[2] = 0x61;
+			 iv[0] =0x61;
+			 //iv[2] =0x61;
+			 iv[0] = 0x61;
+			 //iv[3] = 0x65;
 			 
 				SecretKeySpec sk;
 				sk = new SecretKeySpec(key, "AES");
-				byte[] temp = decrypt(cipherText, sk,iv);
-				
-				 if ( util.isAscii(temp) == true)
-                 		System.out.println(new String(temp));
-				util.printArray("[AES.tryCorrectKey]","Decrypt correct", key);
+				byte[] temp = decrypt(cipherText[0], sk,iv);
+				if (temp == null) {
+					System.out.println("\n[AES.tryCorrectKey()] Key incorrect . decrypt returned null");
+				}
+				else {
+
+				 if ( util.isAscii(temp) == true) {
+                 		System.out.println(new String("[AES tryCorrectKey() ] ASCII -> "+temp));
+				util.printArray("Decrypt correct", key);
+				 }
+				 
+				 util.printArray("plainText not ascii",temp);
+				 
+				 
+				}
 			 }
 			 catch(Exception e) {
 				 e.printStackTrace();
@@ -130,12 +145,12 @@ public static byte[] decrypt(byte[] cipherText,SecretKeySpec skv,byte[] iv)  {
 		 
 		
           public static byte[] getIV() {
-        	  byte[] iv = new byte[] {0x61,0x61,0x61,0};
+        	  byte[] iv = new byte[] {0x61,0x61,0x62,0};
         	  return iv;
           }
 
 		 
-		 public static void tryKey(byte[] secondBlockCipherText,long min,long max) throws Exception  {
+		 public static void tryKey(byte[][] cipherText,long min,long max) throws Exception  {
 
 			 /*
 			  * 
@@ -154,16 +169,17 @@ public static byte[] decrypt(byte[] cipherText,SecretKeySpec skv,byte[] iv)  {
 		                                 while (min <= max) {
 		                                	 	 key = util.longToBytes(min);
 		                                         sk = new SecretKeySpec(key, "AES");
-		                                         util.printArray("[AES.trykey]","KeySpec",key);
+		                                         util.printArray("[AES.trykey] Key Spec ->",key);
 		                                       
 		                                         // Return BadPaddingException
-		                                   //     tempPlainText = decrypt(secondBlockCipherText,sk);
+		                                        tempPlainText = decrypt(cipherText[1],sk,getIV());
 		                                        if (tempPlainText == null) {
 		                                        	System.out.println("\nKey doesnt decrypt cipherText");
 		                                        }
 		                                        else
 		                                        	if ( util.isAscii(tempPlainText) == true)
 		                                        		System.out.println(new String(tempPlainText));
+		                                        		
 		                                        min++;
 		                                        
 		                                        
@@ -182,7 +198,7 @@ public static byte[] decrypt(byte[] cipherText,SecretKeySpec skv,byte[] iv)  {
 			 
 			 try {
 			 
-			 byte[] cipherText = util.readCipherText(AES.cipherFile,false);
+			 byte[][] cipherText = util.readCipherText(AES.cipherFile,false);
 			 
 			 	// two bytes *
 			 	long k = (long)Math.pow(1.407374884,14); //(k == (max_long / 65336))
@@ -201,7 +217,7 @@ public static byte[] decrypt(byte[] cipherText,SecretKeySpec skv,byte[] iv)  {
 				 
 				 // if i = 125*
 				 //for (; k > 0 && foundKey==false; k++) {
-				 for (int it=0; it <  1; it++) {
+				 for (int it=0; it <  0; it++) {
 					 tryKey(cipherText,min,max);
 					 int a = bytesSize(min);
 					 int b = bytesSize(max);
@@ -215,18 +231,19 @@ public static byte[] decrypt(byte[] cipherText,SecretKeySpec skv,byte[] iv)  {
 					 
 					 min = max;
 					 max += interval;
-					 
+				 }
 					 nanoSecs = System.nanoTime() - begin;
 						secs = nanoSecs / 1000000000;
 						mill = nanoSecs / 1000000;
-						System.out.println("\nTime elapsed . Secs ("+secs+") mill ("+mill+") nano ("+nanoSecs+")");
+						System.out.println("\n[END] Time elapsed . Secs ("+secs+") mill ("+mill+") nano ("+nanoSecs+")");
 					 
 
 				 }
-			 }
+			 
 				 catch(Exception e) {
 					 e.printStackTrace();
 				 }
+		 }
 					 //System.out.println("Min "+min.toString(10)+" Max "+max.toString(10));
 				
 					 //tryKey();
@@ -259,14 +276,12 @@ public static byte[] decrypt(byte[] cipherText,SecretKeySpec skv,byte[] iv)  {
 					 System.out.println("\n[getPlainTextBlock] No plaintext collected");
 					 */
 			
-		 }
+		 
 		 
 		 //https://stackoverflow.com/questions/8377050/how-do-i-determine-number-of-bytes-needed-to-represent-a-given-integer
 		 public static int bytesSize(long val) {
 			    int size = 0;
 			    
-			    
-
 			    while(val > 0) {
 			    	val >>= 8;
 			    	size++;

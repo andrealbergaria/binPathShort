@@ -65,52 +65,46 @@ public class util {
          return true;
    	 
      }
-	
-	 public static byte[] readCipherText(File f,boolean debug) {
-     	int len = (int) f.length();
-     	byte[] cipherText = new byte[len];
+	// byte[][] because is uses two blocks of ciphertext
+	 public static byte[][] readCipherText(File f,boolean debug) {
+     	
+     	byte[][] cipherText = new byte[2][16];
+     	
      	
      	try {
     	 
       if (!f.exists()) {
-     	 System.out.println("\nCan't read ciphertext "+f.getAbsolutePath()+", since file doesnt exists");
+     	 System.out.println("\n[util.c readCipherText() ] Can't read ciphertext "+f.getAbsolutePath()+", since file doesnt exists");
      	 
       	return null;
       }
+        
+    		
       FileInputStream fis = new FileInputStream(f);
       
       int fileSize = (int) f.length();
       
-      
-      if (256 % fileSize != 0) {
-     	System.err.println("\n File size is not a mulitple of 256");
+       
+    		  // n = mk
+      if (fileSize % 16 != 0) {
+     	System.err.println("\n File block size is not a mulitple of 16");
       	System.exit(-1);
       }
-      
-      int numBytesRead = 0;
-      
-      numBytesRead = fis.read(cipherText);
-      
-      if (numBytesRead  <= 0) {
-     	 System.err.println("Read returned error or zero");
-     	 System.exit(-1);
-      }
-      
-      
-      else {
 
-     	 System.out.println("[util.readCypherText] Read "+numBytesRead+" from "+f.getAbsolutePath()+" fileSize "+f.length());
-      		if (256 % cipherText.length != 0) {
-      			System.err.println("\n Ciphertext not size of block");
-      			System.exit(-1);
-      		}
-      		if(numBytesRead % 2 != 0 ) {
-      			System.err.println("\n Didnt read the number of bytes from ciphertext");
-      			System.exit(-1);
-      		}
-      }
-      		fis.close();
-      		return cipherText;
+      System.out.println("[util.readCypherText] filesize "+f.length());
+      int numBytesRead=-1;
+      for (int i=0 ; i < AES.numOfBlocksToDecipher ;i++) {
+    	  numBytesRead = fis.read(cipherText[i]);
+    	  if (numBytesRead  != 16) {
+        	  	 System.err.println("[util.c readCipherText()] read() != 16");
+    	     	 System.exit(-1);
+    	      }
+    	  
+      }  
+            
+     	 
+     fis.close();
+      return cipherText;
       }
       catch(FileNotFoundException e) {
       		e.printStackTrace();
@@ -137,13 +131,12 @@ public class util {
 	
 	}
 
-	 public static void printArray(String method,String arrayName,byte[] arr) {
+	 public static void printArray(String msg,byte[] arr) {
 	  		
  		  
-		  System.out.println(method+" size : "+arr.length);
 		  
 		  
-
+		  System.out.println("\n[util.printArray] MSG:  "+msg);
 		  System.out.print("[ ");
 		  for (int i=0; i < arr.length;i++) {
 			    int temp = arr[i] & 0xFF;
@@ -158,22 +151,7 @@ public class util {
 	}
 	
 	
-	  public static void printArray(String arrayName,char[] arr) {
-  		
-  		  
-		  System.out.println("---begin array ("+arrayName+")---");
-		  System.out.println("Array length : "+arr.length);
-
-		  System.out.println("[ ");
-		  for (int i=0; i < arr.length;i++) {
-			    char temp = arr[i];
-				  System.out.print(","+temp);
-			 
-		  }  
-		  System.out.print("\n]");
-		  
-	     	System.out.println("\n---end array ---");
-	}
+	 
 		// showChars, instead of ascii number return character
 	  // print values == true => print values instead of characters
 	  
