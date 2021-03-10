@@ -10,7 +10,11 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.io.RandomAccessFile;
+import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -29,6 +33,26 @@ import binPathShort.AES;
 
 public class util {
 
+	public static void writeLog(BigInteger min,BigInteger max) {
+		PrintWriter writer;
+		try {
+			writer = new PrintWriter("log", "UTF-8");
+			writer.println(getDate());
+			writer.print(min.toString());
+			writer.println(max.toString());
+			writer.close();
+			
+			
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+	}
 	
 	//https://stackoverflow.com/questions/4485128/how-do-i-convert-long-to-byte-and-back-in-java
 	public static byte[] severallongsToBytes(long[] keys) {
@@ -66,9 +90,9 @@ public class util {
    	 
      }
 	// byte[][] because is uses two blocks of ciphertext
-	 public static byte[][] readCipherText(File f,boolean debug) {
+	 public static byte[] readCipherText(File f,boolean debug) {
      	
-     	byte[][] cipherText = new byte[2][16];
+     	byte[] cipherText = new byte[4]; // checking ints for speed. (4 bytes)
      	
      	
      	try {
@@ -94,9 +118,9 @@ public class util {
       System.out.println("[util.readCypherText] filesize "+f.length());
       int numBytesRead=-1;
       for (int i=0 ; i < AES.numOfBlocksToDecipher ;i++) {
-    	  numBytesRead = fis.read(cipherText[i]);
-    	  if (numBytesRead  != 16) {
-        	  	 System.err.println("[util.c readCipherText()] read() != 16");
+    	  numBytesRead = fis.read(cipherText);
+    	  if (numBytesRead  != f.length()) {
+        	  	 System.err.println("[util.c readCipherText()] read() != to size of file");
     	     	 System.exit(-1);
     	      }
     	  
@@ -168,4 +192,21 @@ public class util {
 		return dateString;
 	}
 
+	public static void readLog() {
+		try {
+		     BufferedReader reader = new BufferedReader(new FileReader(new File("./log")));
+		     String r = reader.readLine();
+		     while (r!=null) {
+		    	 // format :  "min max"
+		    	 binPathShort.MinMaxValues.add(r);
+		     }
+		    	 
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 }

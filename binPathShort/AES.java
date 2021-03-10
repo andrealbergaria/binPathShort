@@ -42,9 +42,9 @@ import javax.crypto.spec.SecretKeySpec;
 		 	public static File cipherFile = new File("/home/andrec/workspace_3_8/binPathShort/files/cipherText");
 
 
-		 public static String plainTextsPath = "/home/andrec/workspace_3_8/binPathShort/plainTexts";
+		 public static String plainTextPath = "/home/andrec/workspace_3_8/binPathShort/files/plainText";
 		 public static String logFilePath = "/home/andrec/workspace_3_8/binPathShort/limits";
-		 public static ArrayList<char[]> allPlainTexts = new ArrayList();
+		 public static ArrayList<char[]> allPlainTexts = new ArrayList<>();
 		 public static byte[] solved= { 'a' ,'b','c'};
 		 
 		 
@@ -66,6 +66,7 @@ public static byte[] decrypt(byte[] cipherText,SecretKeySpec skv,byte[] iv)  {
 	        
 	        cipher.init(Cipher.DECRYPT_MODE, skv,ivspec);
 	        System.out.println("[AES. decrypt()] cipherText buffer length "+cipherText.length);
+	        System.out.println("\n[EAS. decrypt()] CipherThext Blocks : "+cipherText.length/16);
 	        buf =cipher.doFinal(cipherText);
 	    	 }
 	        catch(BadPaddingException e) {
@@ -102,7 +103,7 @@ public static byte[] decrypt(byte[] cipherText,SecretKeySpec skv,byte[] iv)  {
 		 public static void tryCorrectKey() {
 			 try {
 				 
-				 byte[][] cipherText = util.readCipherText(AES.cipherFile, false);
+				 byte[] cipherText = util.readCipherText(AES.cipherFile, false);
 				 
 			 byte[] key = new byte[32];
              
@@ -121,7 +122,9 @@ public static byte[] decrypt(byte[] cipherText,SecretKeySpec skv,byte[] iv)  {
 			 
 				SecretKeySpec sk;
 				sk = new SecretKeySpec(key, "AES");
-				byte[] temp = decrypt(cipherText[0], sk,iv);
+				
+					
+				byte[] temp = decrypt(cipherText, sk,iv);
 				if (temp == null) {
 					System.out.println("\n[AES.tryCorrectKey()] Key incorrect . decrypt returned null");
 				}
@@ -129,13 +132,13 @@ public static byte[] decrypt(byte[] cipherText,SecretKeySpec skv,byte[] iv)  {
 
 				 if ( util.isAscii(temp) == true) {
                  		System.out.println(new String("[AES tryCorrectKey() ] ASCII -> "+temp));
-				util.printArray("Decrypt correct", key);
+                 		util.printArray("Decrypt correct", key);
 				 }
 				 
 				 util.printArray("plainText not ascii",temp);
 				 
-				 
-				}
+				}	 
+				
 			 }
 			 catch(Exception e) {
 				 e.printStackTrace();
@@ -145,12 +148,12 @@ public static byte[] decrypt(byte[] cipherText,SecretKeySpec skv,byte[] iv)  {
 		 
 		
           public static byte[] getIV() {
-        	  byte[] iv = new byte[] {0x61,0x61,0x62,0};
+        	  byte[] iv = new byte[] {0x61,0x61,0x61,0};
         	  return iv;
           }
 
 		 
-		 public static void tryKey(byte[][] cipherText,long min,long max) throws Exception  {
+		 public static void tryKey(byte[] cipherText,BigInteger min,BigInteger max) throws Exception  {
 
 			 /*
 			  * 
@@ -164,15 +167,16 @@ public static byte[] decrypt(byte[] cipherText,SecretKeySpec skv,byte[] iv)  {
 			 						    SecretKeySpec sk;
 		                                byte[] tempPlainText;
 		                                
-		                                 byte[] key = new byte[8];
+		                                 //byte[] key = new byte[32];
 		                                 
-		                                 while (min <= max) {
-		                                	 	 key = util.longToBytes(min);
-		                                         sk = new SecretKeySpec(key, "AES");
-		                                         util.printArray("[AES.trykey] Key Spec ->",key);
+		                                 while (min.compareTo(max) < 0) {
+		                                	 	 
+		                                	 			 
+		                                         sk = new SecretKeySpec(min.toByteArray(), "AES");
+		                                         //util.printArray("[AES.trykey] Key Spec ->",key);
 		                                       
 		                                         // Return BadPaddingException
-		                                        tempPlainText = decrypt(cipherText[1],sk,getIV());
+		                                        tempPlainText = decrypt(cipherText,sk,getIV());
 		                                        if (tempPlainText == null) {
 		                                        	System.out.println("\nKey doesnt decrypt cipherText");
 		                                        }
@@ -180,7 +184,7 @@ public static byte[] decrypt(byte[] cipherText,SecretKeySpec skv,byte[] iv)  {
 		                                        	if ( util.isAscii(tempPlainText) == true)
 		                                        		System.out.println(new String(tempPlainText));
 		                                        		
-		                                        min++;
+		                                        min.add(BigInteger.ONE);
 		                                        
 		                                        
 		                                 }
@@ -191,23 +195,15 @@ public static byte[] decrypt(byte[] cipherText,SecretKeySpec skv,byte[] iv)  {
 
 		 
 
-		 public static void getKey(long min,long max,long interval) {
+		 public static void getKey(BigInteger min,BigInteger max,long interval) {
 //			 Integer max value 2147483647
 //			 Short max value 32767
 //			 Long max 9223372036854775807
 			 
 			 try {
 			 
-			 byte[][] cipherText = util.readCipherText(AES.cipherFile,false);
+			 byte[] cipherText = util.readCipherText(AES.cipherFile,false);
 			 
-			 	// two bytes *
-			 	long k = (long)Math.pow(1.407374884,14); //(k == (max_long / 65336))
-				 
-			     if (interval % 2 != 0) {
-			    	 System.err.println("\nInterval not multiple of "+interval+"... exiting");
-			     	System.exit(-1);
-			     }
-			     
 				 // o numero de elementos dum conjunto é o max valor
 				 long nanoSecs=-1;
 				 long secs=-1;
@@ -217,20 +213,16 @@ public static byte[] decrypt(byte[] cipherText,SecretKeySpec skv,byte[] iv)  {
 				 
 				 // if i = 125*
 				 //for (; k > 0 && foundKey==false; k++) {
-				 for (int it=0; it <  0; it++) {
+				 for (int it=0; it <  4; it++) {
 					 tryKey(cipherText,min,max);
-					 int a = bytesSize(min);
-					 int b = bytesSize(max);
 					 System.out.println("Interval " + interval+"\nMin "+min+" Bytes : "+a);
 					 System.out.println("Max "+max+" Bytes : "+b);
 					
-						 
-						 
-							    
-					  
-					 
+					 BigInteger biInterval = new BigInteger("1048576");
+					 if (min.remainder(biInterval) == BigInteger.ZERO)
+						 util.writeLog(min,max);
 					 min = max;
-					 max += interval;
+					 max.add(new BigInteger(String.valueOf(interval)));
 				 }
 					 nanoSecs = System.nanoTime() - begin;
 						secs = nanoSecs / 1000000000;

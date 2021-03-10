@@ -6,11 +6,14 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.ArrayList;
 
 import javax.crypto.spec.SecretKeySpec;
 
 public class binPathShort {
 
+	public static ArrayList<String> MinMaxValues = new ArrayList<>();
+	
 	/**
 	 * @param args
 	 */
@@ -26,28 +29,23 @@ public class binPathShort {
 	*/
 			
 			try {
-				File f = new File("/home/andrec/workspace_3_8/binPathShort/minmax");
-				if (!f.exists() || f.length() ==0) {
-					f.createNewFile();
-				}
-				BufferedReader br = new BufferedReader(new FileReader("/home/andrec/workspace_3_8/binPathShort/minmax"));
-				String minmax = br.readLine();
-				br.close();
-				if (minmax == null) {
-					System.out.println("\n[binPahtShort.java main()] ficheiro min max nao existe");
-				}
-				/*String minMaxArgs[]  = minmax.split(" ");
-				String interval = String.valueOf(minMaxArgs[0]);
-				BigInteger min = new BigInteger(minMaxArgs[1]);
-				BigInteger max = new BigInteger(minMaxArgs[2]);
-				*/
+				File f = new File("/home/andrec/workspace_3_8/binPathShort/log");
+				BufferedReader input = new BufferedReader(new FileReader(f));
+			    String last="", line="";
+
+			    while ((line = input.readLine()) != null) { 
+			        last = line;
+			    }
+			    
+			    String[] minMax = last.split(" ");
+			    
+			    BigInteger minFile = new BigInteger(minMax[0]);
+				BigInteger maxFile = new BigInteger(minMax[1]);
 				
+			    
 				
-				
-				
-				long interval = 8388608; //65536*128
-				long min = 0;
-				long max = interval;
+				BigInteger interval = new BigInteger("8388608"); //65536*128
+				//long max = interval;
 				AES.tryCorrectKey();
 				//AES.getKey(min,max,interval);
 				
