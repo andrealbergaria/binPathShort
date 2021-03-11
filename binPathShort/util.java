@@ -38,7 +38,7 @@ public class util {
 		try {
 			writer = new PrintWriter("log", "UTF-8");
 			writer.println(getDate());
-			writer.print(min.toString());
+			writer.print(min.toString()+" ");
 			writer.println(max.toString());
 			writer.close();
 			System.out.println("\nWrote log ["+min.toString()+","+max.toString()+"]");
@@ -243,22 +243,18 @@ public class util {
 			    
 			    String[] minMax = minMaxRead.split(" ");
 			    
-			    BigInteger minFile;
-			    BigInteger maxFile;
 			    if (minMax.length != 2 ) {
 			    	System.out.println("\nWrong log format..couldnt use min and max token");
-			    	minFile = new BigInteger("0");
-			    	maxFile = new BigInteger("524288"); // 524288 => 65536*8
+			    	// default
+			    	binPathShort.min = new BigInteger("0");
+			    	binPathShort.max = new BigInteger("524288"); // 524288 => 65536*8
 			    }
 			    else {
-			    minFile = new BigInteger(minMax[0]);
-				maxFile = new BigInteger(minMax[1]);
+			    binPathShort.min = new BigInteger(minMax[0]);
+				binPathShort.max = new BigInteger(minMax[1]);
 			    }
 				
 		     	 // format :  "min max"
-		    	 binPathShort.minMaxValues[0]= minFile;
-		    	 binPathShort.minMaxValues[1]= maxFile;
-		    	 
 		    	 reader.close();
 		    	 
 		     }

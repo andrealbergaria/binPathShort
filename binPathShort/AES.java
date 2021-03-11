@@ -33,7 +33,8 @@ import javax.crypto.spec.SecretKeySpec;
 
 
 	 public class AES {
-		
+		public static byte[] IV = {65,65,65, 0,0,0, 0,0,0, 0,0,0, 0,0,0, 0};
+		public static byte[] correctKey = {65,65,65, 0,0,0, 0,0,0, 0,0,0, 0,0,0, 0};
 		 public static int numOfBlocksToDecipher;
 		 
 		 	public static File cipherFile32 = new File("/home/andrec/workspace_3_8/binPathShort/files/cipherText32");
@@ -44,24 +45,12 @@ import javax.crypto.spec.SecretKeySpec;
 		 public static String plainTextPath = "/home/andrec/workspace_3_8/binPathShort/files/plainText";
 		 public static String logFilePath = "/home/andrec/workspace_3_8/binPathShort/limits";
 		 public static ArrayList<char[]> allPlainTexts = new ArrayList<>();
-		 public static byte[] solved= { 'a' ,'b','c'};
 		 
 		 
-		 /**https://stackoverflow.com/questions/15554296/initial-bytes-incorrect-after-java-aes-cbc-decryption
-		     * Decrypts the given byte array
-		     *
-		     * @param cipherText The data to decrypt
-		     */
-		    public static byte[] decryptSite(byte[] cipherText,SecretKeySpec key) throws Exception
-		    {
-		        Cipher cipher = Cipher.getInstance("AES");
-		        cipher.init(Cipher.DECRYPT_MODE, key);
-
-		        return cipher.doFinal(cipherText);
-		    }
+		 
 		    
 		    // END SITE
-public static byte[][] decrypt(byte[][] cipherText,SecretKeySpec skv,byte[] iv)  {
+public static byte[][] decrypt(byte[][] cipherText,SecretKeySpec skv)  {
         	 
 		
 			
@@ -71,7 +60,7 @@ public static byte[][] decrypt(byte[][] cipherText,SecretKeySpec skv,byte[] iv) 
 	    		 
 	       // 	util.printArray("KEY",sks.getEncoded());
 	        Cipher cipher;
-	  		IvParameterSpec ivspec = new IvParameterSpec(iv);
+	  		IvParameterSpec ivspec = new IvParameterSpec(AES.IV);
 	  		//cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
 	  		cipher = Cipher.getInstance("AES/CBC/NOPADDING");
 	  		
@@ -80,11 +69,11 @@ public static byte[][] decrypt(byte[][] cipherText,SecretKeySpec skv,byte[] iv) 
 	        
 	        // Cipher Text correct (checked with od -t x --endian big cipherText32)
 
-	        /*for (int i=0; i < AES.numOfBlocksToDecipher; i++) {
+	        for (int i=0; i < AES.numOfBlocksToDecipher; i++) {
 	        	buf[i] =cipher.doFinal(cipherText[i]);
 	        	
-	        }*/
-	        buf[0] = cipher.doFinal(cipherText[0]);
+	        }
+	        
 	        return buf;
 	    	 }
 	        catch(BadPaddingException e) {
@@ -142,7 +131,7 @@ public static byte[][] decrypt(byte[][] cipherText,SecretKeySpec skv,byte[] iv) 
 				sk = new SecretKeySpec(key, "AES");
 				
 					// Cipher Text correct (checked with od -t x --endian big cipherText32)
-				byte[][] temp= decrypt(cipherText, sk,iv);
+				byte[][] temp= decrypt(cipherText, sk);
 				if (temp == null) {
 					System.out.println("\n[AES.tryCorrectKey()] Key incorrect . decrypt returned null");
 				}
@@ -166,12 +155,7 @@ public static byte[][] decrypt(byte[][] cipherText,SecretKeySpec skv,byte[] iv) 
 		 }
 		 
 		
-          public static byte[] getIV() {
-        	  byte[] iv = new byte[] {0x61,0x61,0x61,0};
-        	  return iv;
-          }
-
-		 
+          
 		 public static void tryKey(byte[][] cipherText,BigInteger min,BigInteger max) throws Exception  {
 
 			 /*
@@ -185,16 +169,42 @@ public static byte[][] decrypt(byte[][] cipherText,SecretKeySpec skv,byte[] iv) 
 			 						    
 			 						    SecretKeySpec sk;
 		                                byte[][] temp = new byte[AES.numOfBlocksToDecipher][16];
-		                                
-		                                 //byte[] key = new byte[32];
+		                                byte[] tempArray;
+		                                int it=0; // to make sure the program still running
 		                                 
-		                                 while (min.compareTo(max) < 0) {
-		                                	 	 
-		                                	 			 
-		                                         sk = new SecretKeySpec(min.toByteArray(), "AES");
+		                                 byte[] key = new byte[32];
+		                                 
+		                                 // o numero de elementos dum conjunto é o max valor
+		                				 long nanoSecs=-1;
+		                				 long secs=-1;
+		                				 long mill=-1;
+		                				 long begin = System.nanoTime();
+		                				 
+		                                 
+		                                  while (min.compareTo(max) < 0) {
+		                                	  it++;
+		                                	  if (it==35) {
+		                                		  System.out.println("\nMin "+min.toString(16));
+		                                	  	  it=0;
+		                                	  }
+		                                	  
+		                                	  
+		                                	  tempArray = min.toByteArray();
+				                              System.arraycopy(tempArray, 0, key,0, tempArray.length);
+				                                 
+		                                	 if (Arrays.equals(key,correctKey)) {
+		                                		 System.out.println("\nFound Key");
+		                                		 util.printArray("KEY", key, true);
+		                                		 nanoSecs = System.nanoTime() - begin;
+		                 						 secs = nanoSecs / 1000000000;
+		                 						 mill = nanoSecs / 1000000;
+		                 						 System.out.println("\n[END FOUND KEY] Time elapsed . Secs ("+secs+") mill ("+mill+") nano ("+nanoSecs+")");
+		                                		 System.exit(-1);
+		                                  	 }
+		                                         sk = new SecretKeySpec(key, "AES");
 		                                       
-		                                        
-		                                         temp= decrypt(cipherText,sk,getIV());
+		                                        // IV is static (must be initialized on running)
+		                                         temp= decrypt(cipherText,sk);
 		                                        if (temp == null) {
 		                                        	System.out.println("\nNo suitable Key that decrypts ASCII values");
 		                                        }
@@ -207,8 +217,7 @@ public static byte[][] decrypt(byte[][] cipherText,SecretKeySpec skv,byte[] iv) 
 		                                        		}
 		                                        	}
 		                                        }
-		                            					
-		                                        min.add(BigInteger.ONE);
+		                                        min = min.add(BigInteger.ONE);	
 		                                        
 		                                        
 		                                 }
@@ -219,7 +228,7 @@ public static byte[][] decrypt(byte[][] cipherText,SecretKeySpec skv,byte[] iv) 
 
 		 
 
-		 public static void cycle(BigInteger min,BigInteger max,long interval) {
+		 public static void cycle(BigInteger min,BigInteger max,BigInteger interval) {
 //			 Integer max value 2147483647
 //			 Short max value 32767
 //			 Long max 9223372036854775807
@@ -241,17 +250,16 @@ public static byte[][] decrypt(byte[][] cipherText,SecretKeySpec skv,byte[] iv) 
 					 AES.tryKey(cipherText,min,max);
 					 System.out.println("Iteration : "+it+"\nMin "+min+"\nMax "+max);
 					 
-					 BigInteger biInterval = new BigInteger("1048576");
-					 if (min.remainder(biInterval) == BigInteger.ZERO) 
+					 if (min.remainder(interval) == BigInteger.ZERO) 
 						 util.writeLog(min,max);
 					 
 					 min = max;
-					 max.add(new BigInteger(String.valueOf(interval)));
+					 max=max.add(interval);
 				 }
 					 nanoSecs = System.nanoTime() - begin;
 						secs = nanoSecs / 1000000000;
 						mill = nanoSecs / 1000000;
-						System.out.println("\n[END] Time elapsed . Secs ("+secs+") mill ("+mill+") nano ("+nanoSecs+")");
+						System.out.println("\n[END TOTAL ITERATIONS NO KEY FOUND] Time elapsed . Secs ("+secs+") mill ("+mill+") nano ("+nanoSecs+")");
 					 
 
 				 }
