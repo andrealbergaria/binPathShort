@@ -15,6 +15,9 @@ import java.io.PrintWriter;
 import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -35,20 +38,26 @@ import binPathShort.AES;
 
 public class util {
 
-	public static void writeLog(BigInteger min,BigInteger max) {
-		PrintWriter writer;
+	public static void writeLog(BigInteger min,BigInteger max,String id) {
 		try {
-			writer = new PrintWriter("log", "UTF-8");
-			writer.println(getDate());
-			writer.print(min.toString()+" ");
-			writer.println(max.toString());
-			writer.close();
-			System.out.println("\nWrote log ["+min.toString()+","+max.toString()+"]");
+		    
+			
+			String s = getDate();
+			s+="\nID : "+id;
+			s+="\n0x"+min.toString(16)+" ";
+			s+="0x"+max.toString(16)+"\n";
+			Files.write(Paths.get("log"), s.getBytes(), StandardOpenOption.APPEND);
+			
+			
+			System.out.println("\nWrote log [0x"+min.toString(16)+",0x"+max.toString(16)+"]");
 			
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -176,19 +185,16 @@ public class util {
 	
 	}
 
-	 public static void writePossibleKey(byte[] key,String id) {
+	 public static void writePossibleKey(byte[] key,byte[] plainText,String id) {
 		 try {
 			PrintWriter pw = new PrintWriter(new FileWriter(new File("possible_keys"),true));
-			String keyStr = "{ ";
-			pw.println(util.getDate());
-			pw.println(id);
 			
-			for (int i=0; i < key.length; i++) {
-				keyStr += String.format("%x",key[i])+",";
-			}
-			keyStr += " } ";
-			pw.println(keyStr);
+			pw.println(util.getDate());
+			pw.println("ID : "+id);
+			pw.println("PlainText : "+Arrays.toString(plainText));
+			pw.println("Key : "+Arrays.toString(key));
 			pw.close();
+			
 			
 			
 		} catch (IOException e) {
@@ -210,11 +216,9 @@ public class util {
 			    s1 += (char) temp +",";
 			    s2 += "0x"+String.format("%x",temp)+",";
 			    }
-		  if (foundKey) {
-			  System.out.println("KEY FOUND : ["+s2+"] ");
-		  }
-		  else
-			  System.out.print("[ "+s1+"]\n[ "+s2+"]\n");  
+		  if (foundKey)
+			  System.out.println("KEY FOUND");
+		    System.out.print("[ "+s1+"]\n[ "+s2+"]\n");  
 	 	
 		  
 		  
@@ -244,10 +248,13 @@ public class util {
 			File log = new File("log");
 			
 			if (log.length() ==0 || !log.exists()) {
-					System.out.println("\nlog file doesn't exist..creating an empty file");
-					log.createNewFile();
+					System.out.println("\nlog file doesn't exist or is empty..assuming default");
+					// default
+					binPathShort.min = new BigInteger("0");
+			    	binPathShort.max = new BigInteger("524288"); // 524288 => 65536*8
+			    	return;
 			}
-				
+			else {
 				
 		     BufferedReader reader = new BufferedReader(new FileReader(log));
 		     String line="",minMaxRead="";
@@ -258,26 +265,25 @@ public class util {
 			        minMaxRead = line;
 			    }
 			    
-			    if (countLines % 2 != 0 && countLines != 0) {
-			    	System.out.println("\nWrong log format, liens not multiple of 2(date and min max)");
-			    	System.exit(-1);
-			    }
-			    
 			    String[] minMax = minMaxRead.split(" ");
 			    
-			    if (minMax.length != 2 ) {
-			    	System.out.println("\nWrong log format..couldnt use min and max token");
+			    if (countLines % 3 != 0 && countLines != 0 || minMax.length != 2) {
+			    	System.out.println("\nWrong log format, assuming default [0,524288]");
 			    	// default
 			    	binPathShort.min = new BigInteger("0");
 			    	binPathShort.max = new BigInteger("524288"); // 524288 => 65536*8
 			    }
 			    else {
-			    binPathShort.min = new BigInteger(minMax[0]);
-				binPathShort.max = new BigInteger(minMax[1]);
+ 
+			    binPathShort.min = new BigInteger(minMax[0].substring(2),16);
+			    binPathShort.max = new BigInteger(minMax[1].substring(2),16);
+			    
+				System.out.println("\n[util.java readLog()]  Min "+binPathShort.min+" Max "+ binPathShort.max);
 			    }
-				
+			    reader.close();
+			}
 		     	 // format :  "min max"
-		    	 reader.close();
+		    	 
 		    	 
 		     }
 		    	 

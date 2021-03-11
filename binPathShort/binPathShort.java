@@ -13,8 +13,8 @@ import javax.crypto.spec.SecretKeySpec;
 
 public class binPathShort {
 
-	public static BigInteger min;
-	public static BigInteger max;
+	public static BigInteger min = new BigInteger("0");
+	public static BigInteger max = new BigInteger("2097152");
 	public static BigInteger interval = new BigInteger("2097152"); //65536*32
 	
 	
@@ -31,13 +31,12 @@ public class binPathShort {
 		System.out.println("Long  "+Long.MAX_VALUE);
 		
 	*/
-			
-			
 				util.readLog();
 			    
 				AES.correctKey[0] =0x61;
 				AES.correctKey[1] = 0x61;
 				
+				// prints array correctly System.out.println(Arrays.toString(AES.correctKey));
 				//long max = interval;
 				//AES.tryCorrectKey();
 				AES.cycle(min,max,interval);
