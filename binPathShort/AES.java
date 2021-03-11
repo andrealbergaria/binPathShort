@@ -33,8 +33,8 @@ import javax.crypto.spec.SecretKeySpec;
 
 
 	 public class AES {
-		public static byte[] IV = {65,65,65, 0,0,0, 0,0,0, 0,0,0, 0,0,0, 0};
-		public static byte[] correctKey = {65,65,65, 0,0,0, 0,0,0, 0,0,0, 0,0,0, 0};
+		public static byte[] IV = {0,0,0, 0,0,0, 0,0,0, 0,0,0, 0,0,0x61,0x61};
+		public static byte[] correctKey = new byte[32];
 		 public static int numOfBlocksToDecipher;
 		 
 		 	public static File cipherFile32 = new File("/home/andrec/workspace_3_8/binPathShort/files/cipherText32");
@@ -117,14 +117,14 @@ public static byte[][] decrypt(byte[][] cipherText,SecretKeySpec skv)  {
 
 			 key[0] =0x61;
 			 key[1] = 0x61;
-			 key[2] = 0x61;
+		
 			 
 			 byte[] iv = new byte[16];
 			 
 			 iv[0] = 0x61;
 			 iv[1] =0x61;
 			 //iv[2] =0x61;
-			 iv[2] = 0x61;
+		
 			 //iv[3] = 0x65;
 			 
 				SecretKeySpec sk;
@@ -165,6 +165,7 @@ public static byte[][] decrypt(byte[][] cipherText,SecretKeySpec skv)  {
 			  *long[] keys = new long[4]; This will be required on tsting 32 bytes 
 			  *
 			  */
+			 
 			 						 
 			 						    
 			 						    SecretKeySpec sk;
@@ -183,25 +184,20 @@ public static byte[][] decrypt(byte[][] cipherText,SecretKeySpec skv)  {
 		                                 
 		                                  while (min.compareTo(max) < 0) {
 		                                	  it++;
-		                                	  if (it==35) {
-		                                		  System.out.println("\nMin "+min.toString(16));
+		                                	  tempArray = min.toByteArray();
+		                                	  int len = tempArray.length;
+		                                	  if (it==10000) {
+		                                		  System.out.print("\nMin 0x"+min.toString(16) + " "+min.toString()+"d");
+		                                		  System.out.println("\nMax 0x"+max.toString(16) + " "+max.toString()+"d");
+		                                		  util.writeLog(min, max);
 		                                	  	  it=0;
 		                                	  }
 		                                	  
 		                                	  
-		                                	  tempArray = min.toByteArray();
-				                              System.arraycopy(tempArray, 0, key,0, tempArray.length);
-				                                 
-		                                	 if (Arrays.equals(key,correctKey)) {
-		                                		 System.out.println("\nFound Key");
-		                                		 util.printArray("KEY", key, true);
-		                                		 nanoSecs = System.nanoTime() - begin;
-		                 						 secs = nanoSecs / 1000000000;
-		                 						 mill = nanoSecs / 1000000;
-		                 						 System.out.println("\n[END FOUND KEY] Time elapsed . Secs ("+secs+") mill ("+mill+") nano ("+nanoSecs+")");
-		                                		 System.exit(-1);
-		                                  	 }
-		                                         sk = new SecretKeySpec(key, "AES");
+		                                	  
+				                              System.arraycopy(tempArray, 0, key,0, len);
+				                             // Key is set ok
+				                                 sk = new SecretKeySpec(key, "AES");
 		                                       
 		                                        // IV is static (must be initialized on running)
 		                                         temp= decrypt(cipherText,sk);
@@ -211,8 +207,14 @@ public static byte[][] decrypt(byte[][] cipherText,SecretKeySpec skv)  {
 		                                        else {
 		                                        	for (int block=0; block < AES.numOfBlocksToDecipher; block++) {
 		                                        		if (util.isAscii(temp[block]) == true) {
-	                            							util.printArray(null,temp[block],true);
-	                            							util.printArray(null,sk.getEncoded(),true);
+		                                        			
+		                                        		 util.printArray(null, key, true);
+		   		                                		 nanoSecs = System.nanoTime() - begin;
+		   		                 						 secs = nanoSecs / 1000000000;
+		   		                 						 mill = nanoSecs / 1000000;
+		   		                 						 System.out.println("\n[END FOUND KEY] Time elapsed . Secs ("+secs+") mill ("+mill+") nano ("+nanoSecs+")");
+		   		                 						 util.writePossibleKey(key,"TEST"); // key in bytes and write id on file test in this case
+		   		                                		 util.printArray(null,key,true);
 	                            					
 		                                        		}
 		                                        	}

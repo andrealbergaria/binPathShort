@@ -7,6 +7,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import javax.crypto.spec.SecretKeySpec;
 
@@ -34,7 +35,8 @@ public class binPathShort {
 			
 				util.readLog();
 			    
-				
+				AES.correctKey[0] =0x61;
+				AES.correctKey[1] = 0x61;
 				
 				//long max = interval;
 				//AES.tryCorrectKey();

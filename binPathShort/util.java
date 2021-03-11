@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.RandomAccess;
 
+import javax.xml.crypto.dsig.keyinfo.KeyInfo;
+
 
 
 import binPathShort.util;
@@ -81,7 +83,7 @@ public class util {
   	   
 		 
      		 for (byte b: keyToBeTested) {
-     			 if ( b > 0x7f | b <=0x20) {
+     			 if ( b > 0x7e | b < 0x20) {
      							return false;
      				}
      		 }
@@ -174,25 +176,45 @@ public class util {
 	
 	}
 
+	 public static void writePossibleKey(byte[] key,String id) {
+		 try {
+			PrintWriter pw = new PrintWriter(new FileWriter(new File("possible_keys"),true));
+			String keyStr = "{ ";
+			pw.println(util.getDate());
+			pw.println(id);
+			
+			for (int i=0; i < key.length; i++) {
+				keyStr += String.format("%x",key[i])+",";
+			}
+			keyStr += " } ";
+			pw.println(keyStr);
+			pw.close();
+			
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	 }
+
+	
 	 public static void printArray(String msg,byte[] arr,boolean foundKey) {
 	  		
  		  
 		  
 		  if (!foundKey)
 			  System.out.println("\n[util.printArray] MSG:  "+msg);
-		  String s1="",s2="",s3="";
+		  String s1="",s2="";
 		  for (int i=0; i < arr.length;i++) {
 			    int temp = arr[i] & 0xFF;
 			    s1 += (char) temp +",";
 			    s2 += "0x"+String.format("%x",temp)+",";
-			    s3 += temp+",";
 			    }
 		  if (foundKey) {
-			  System.out.println("[ "+s1+"] ASCII ");
-			  System.out.println("Key : ["+s2+"]");
+			  System.out.println("KEY FOUND : ["+s2+"] ");
 		  }
 		  else
-			  System.out.print("[ "+s1+"] ASCII \n["+s2+"]\n["+s3+"] DIGITAL");  
+			  System.out.print("[ "+s1+"]\n[ "+s2+"]\n");  
 	 	
 		  
 		  
