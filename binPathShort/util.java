@@ -41,7 +41,7 @@ public class util {
 			writer.print(min.toString());
 			writer.println(max.toString());
 			writer.close();
-			
+			System.out.println("\nWrote log ["+min.toString()+","+max.toString()+"]");
 			
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
@@ -89,12 +89,24 @@ public class util {
          return true;
    	 
      }
+	 
+	 public static boolean testCipherText(byte[][] cipherText) {
+		 // use on console on dir files/ 
+		 //od -t x --endian big cipherText32  | cut -f 2,3,4,5 -d " "
+		 /*
+		  * 2e9b58c0 cc5387bb 93fba95b 938b780a
+			5a252af4 04c1a70e 921a1e1f d725317b
+		  * 
+		  */
+		 return false;
+	 }
+	 
 	// byte[][] because is uses two blocks of ciphertext
-	 public static byte[] readCipherText(File f,boolean debug) {
+	 public static byte[][] readCipherText(File f,boolean debug) {
      	
-     	byte[] cipherText = new byte[4]; // checking ints for speed. (4 bytes)
+     	 
      	
-     	
+     	byte[][] cipherText = null;
      	try {
     	 
       if (!f.exists()) {
@@ -116,11 +128,15 @@ public class util {
       }
 
       System.out.println("[util.readCypherText] filesize "+f.length());
+      
+      AES.numOfBlocksToDecipher = (int) f.length() / 16;
+      cipherText = new byte[AES.numOfBlocksToDecipher][16];
+      
       int numBytesRead=-1;
       for (int i=0 ; i < AES.numOfBlocksToDecipher ;i++) {
-    	  numBytesRead = fis.read(cipherText);
-    	  if (numBytesRead  != f.length()) {
-        	  	 System.err.println("[util.c readCipherText()] read() != to size of file");
+    	  numBytesRead = fis.read(cipherText[i]);
+    	  if (numBytesRead  != 16) {
+        	  	 System.err.println("[util.c readCipherText()] operation read() didn't read 16 bytes");
     	     	 System.exit(-1);
     	      }
     	  
@@ -128,6 +144,9 @@ public class util {
             
      	 
      fis.close();
+     // Reads correcly ciphertext (tested with od -t x --endian big cipherText32)
+     //util.printArray("CipherText READ ", cipherText[0]);
+     //util.printArray("CipherText READ ", cipherText[1]);
       return cipherText;
       }
       catch(FileNotFoundException e) {
@@ -155,21 +174,27 @@ public class util {
 	
 	}
 
-	 public static void printArray(String msg,byte[] arr) {
+	 public static void printArray(String msg,byte[] arr,boolean foundKey) {
 	  		
  		  
 		  
-		  
-		  System.out.println("\n[util.printArray] MSG:  "+msg);
-		  System.out.print("[ ");
+		  if (!foundKey)
+			  System.out.println("\n[util.printArray] MSG:  "+msg);
+		  String s1="",s2="",s3="";
 		  for (int i=0; i < arr.length;i++) {
 			    int temp = arr[i] & 0xFF;
-			    if (i == arr.length-1)
-			    		System.out.print(temp);
-			    else
-			    	System.out.print(temp + ",");
-		  }  
-		  System.out.println(" ]\n[util.printArray] Finished Array");
+			    s1 += (char) temp +",";
+			    s2 += "0x"+String.format("%x",temp)+",";
+			    s3 += temp+",";
+			    }
+		  if (foundKey) {
+			  System.out.println("[ "+s1+"] ASCII ");
+			  System.out.println("Key : ["+s2+"]");
+		  }
+		  else
+			  System.out.print("[ "+s1+"] ASCII \n["+s2+"]\n["+s3+"] DIGITAL");  
+	 	
+		  
 		  
 		  
 	}
@@ -194,14 +219,51 @@ public class util {
 
 	public static void readLog() {
 		try {
-		     BufferedReader reader = new BufferedReader(new FileReader(new File("./log")));
-		     String r = reader.readLine();
-		     while (r!=null) {
-		    	 // format :  "min max"
-		    	 binPathShort.MinMaxValues.add(r);
+			File log = new File("log");
+			
+			if (log.length() ==0 || !log.exists()) {
+					System.out.println("\nlog file doesn't exist..creating an empty file");
+					log.createNewFile();
+			}
+				
+				
+		     BufferedReader reader = new BufferedReader(new FileReader(log));
+		     String line="",minMaxRead="";
+			 int countLines =0;
+
+			    while ((line = reader.readLine()) != null) 
+			    {	countLines++;
+			        minMaxRead = line;
+			    }
+			    
+			    if (countLines % 2 != 0 && countLines != 0) {
+			    	System.out.println("\nWrong log format, liens not multiple of 2(date and min max)");
+			    	System.exit(-1);
+			    }
+			    
+			    String[] minMax = minMaxRead.split(" ");
+			    
+			    BigInteger minFile;
+			    BigInteger maxFile;
+			    if (minMax.length != 2 ) {
+			    	System.out.println("\nWrong log format..couldnt use min and max token");
+			    	minFile = new BigInteger("0");
+			    	maxFile = new BigInteger("524288"); // 524288 => 65536*8
+			    }
+			    else {
+			    minFile = new BigInteger(minMax[0]);
+				maxFile = new BigInteger(minMax[1]);
+			    }
+				
+		     	 // format :  "min max"
+		    	 binPathShort.minMaxValues[0]= minFile;
+		    	 binPathShort.minMaxValues[1]= maxFile;
+		    	 
+		    	 reader.close();
+		    	 
 		     }
 		    	 
-		} catch (FileNotFoundException e) {
+		 catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {

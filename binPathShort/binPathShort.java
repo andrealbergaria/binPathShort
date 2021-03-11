@@ -12,7 +12,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 public class binPathShort {
 
-	public static ArrayList<String> MinMaxValues = new ArrayList<>();
+	public static BigInteger[] minMaxValues = new BigInteger[2];
 	
 	/**
 	 * @param args
@@ -28,39 +28,14 @@ public class binPathShort {
 		
 	*/
 			
-			try {
-				File f = new File("/home/andrec/workspace_3_8/binPathShort/log");
-				BufferedReader input = new BufferedReader(new FileReader(f));
-			    String last="", line="";
-
-			    while ((line = input.readLine()) != null) { 
-			        last = line;
-			    }
-			    
-			    String[] minMax = last.split(" ");
-			    
-			    BigInteger minFile = new BigInteger(minMax[0]);
-				BigInteger maxFile = new BigInteger(minMax[1]);
-				
+			
+				util.readLog();
 			    
 				
 				BigInteger interval = new BigInteger("8388608"); //65536*128
 				//long max = interval;
 				AES.tryCorrectKey();
-				//AES.getKey(min,max,interval);
-				
-			
-				
-				
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-		
-		
-		
-		 
+				//AES.cycle(min,max,interval);
 	}
 
 }
