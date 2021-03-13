@@ -33,6 +33,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 
 	 public class AES {
+		 public static boolean debug=false;
 		public static byte[] IV = {0,0,0, 0,0,0, 0,0,0, 0,0,0, 0,0,0x61,0x61};
 		public static byte[] correctKey = new byte[32];
 		 public static int numOfBlocksToDecipher;
@@ -42,11 +43,6 @@ import javax.crypto.spec.SecretKeySpec;
 
 		 	public static File cipherFile = cipherFile32;
 
-		 public static String plainTextPath = "/home/andrec/workspace_3_8/binPathShort/files/plainText";
-		 public static String logFilePath = "/home/andrec/workspace_3_8/binPathShort/limits";
-		 public static ArrayList<char[]> allPlainTexts = new ArrayList<>();
-		 
-		 
 		 
 		    
 		    // END SITE
@@ -78,27 +74,34 @@ public static byte[][] decrypt(byte[][] cipherText,SecretKeySpec skv)  {
 	        return buf;
 	    	 }
 	        catch(BadPaddingException e) {
+	        	if (AES.debug)
 	        	util.printArray("Invalid Key" ,skv.getEncoded(),false);
 	        }
 	        	
 	        catch(InvalidKeyException e) {
+	        	if (AES.debug)
 	        	util.printArray("Invalid Key" ,skv.getEncoded(),false);
 	    		 
 	    	 }
 	        
 	  		catch (IllegalBlockSizeException e) {
-	  			
+	        	if (AES.debug)
+
 	  			util.printArray("Invalid Key" ,skv.getEncoded(),false);
             } catch (NoSuchAlgorithmException e) {
-				
+	        	if (AES.debug)
+
             	util.printArray("Invalid Key" ,skv.getEncoded(),false);
 				
 				
 				
 			} catch (NoSuchPaddingException e) {
-				
+	        	if (AES.debug)
+
 				util.printArray("Invalid Key" ,skv.getEncoded(),false);
 			} catch (InvalidAlgorithmParameterException e) {
+	        	if (AES.debug)
+
 				// TODO Auto-generated catch block
 				util.printArray("Invalid Key" ,skv.getEncoded(),false);
 			} 
@@ -150,7 +153,7 @@ public static byte[][] decrypt(byte[][] cipherText,SecretKeySpec skv)  {
 		 
 		
           
-		 public static void tryKey(byte[][] cipherText,BigInteger min,BigInteger max) throws Exception  {
+		 public static void tryKey(byte[][] cipherText) throws Exception  {
 
 			 /*
 			  * 
@@ -169,37 +172,25 @@ public static byte[][] decrypt(byte[][] cipherText,SecretKeySpec skv)  {
 		                                 byte[] key = new byte[32];
 		                                 
 		                                 // o numero de elementos dum conjunto é o max valor
-		                				 long nanoSecs=-1;
-		                				 long secs=-1;
-		                				 long mill=-1;
-		                				 long begin = System.nanoTime();
 		                				 
-		                                  while (min.compareTo(max) < 0) {
-		                                	  tempArray = min.toByteArray();
-		                                	  int len = tempArray.length;
-		                                	  
-		                                	  
-		                                	  
-				                              System.arraycopy(tempArray, 0, key,0, len);
-				                             // Key is set ok
-				                                 sk = new SecretKeySpec(key, "AES");
+		                                  while (!Arrays.equals(min,max) {
+		                                	  key = util.shortArrayToByteArray(binPathShort.min);
+		                                	     sk = new SecretKeySpec(key, "AES");
 		                                       
 		                                        // IV is static (must be initialized on running)
 		                                         temp= decrypt(cipherText,sk);
 		                                       
 		                                        	for (int block=0; block < AES.numOfBlocksToDecipher; block++) {
 		                                        		if (util.isAscii(temp[block]) == true) {
-		                                        			
-		                                        		 nanoSecs = System.nanoTime() - begin;
-		   		                 						 secs = nanoSecs / 1000000000;
-		   		                 						 mill = nanoSecs / 1000000;
-		   		                 						 util.writePossibleKey(key,temp[block],"0x"+min.toString(16)); // key in bytes and write id on file test in this case
+		                                        		 util.writePossibleKey(key,temp[block],"0x"+min.toString(16)); // key in bytes and write id on file test in this case
+		                                        		 if (AES.debug)
 		   		                 						 System.out.println("\nFound Key "+Arrays.toString(key));
 		   		                 						 
 		   		                 						 
 		   		                                	
 		                                        		}
 		                                        	}
+		                 					  
 		                                        min = min.add(BigInteger.ONE);	
 		                                        
 		                                        
@@ -229,28 +220,36 @@ public static byte[][] decrypt(byte[][] cipherText,SecretKeySpec skv)  {
 				 long nanoIt=0;
 				 long secsIt=0;
 				 long millIt=0;
-				 for (int it=0; it <  100; it++) {
+				 long nanoTemp=0;
+				  
+				 BigInteger maxInt = new BigInteger("2147483647");
+				 while(min.compareTo(maxInt) < 0) {
 					 
 					 nanoSecs = System.nanoTime()-begin;
+					 nanoTemp=System.nanoTime();
 					 secs = nanoSecs / 1000000000;
 					 mill = nanoSecs / 1000000;
+					 if (debug)
 					 System.out.println("\nTotal Time elapsed . Secs ("+secs+") mill ("+mill+") nano ("+nanoSecs+")");
-					 System.out.println("\n[ITERATION "+it+"] Secs ("+secsIt+") mill ("+millIt+") nano ("+nanoIt+")");;
+					 if (debug)
+					 System.out.println("\n[ITERATION "+binPathShort.iterator+"] Secs ("+secsIt+") mill ("+millIt+") nano ("+nanoIt+")");;
 					 //System.out.print(" Min 0x"+min.toString(16));
 					// System.out.print(" Max 0x"+max.toString(16));
 					 
 					 AES.tryKey(cipherText,min,max);
 					 
-					 util.writeLog(min,max,"Iteration "+it);
+					 util.writeLog(secsIt,min,max,"Iteration "+binPathShort.iterator);
 					 
 					 min = max;
 					 max=max.add(interval);
 					 
-					 nanoIt = System.nanoTime()-nanoSecs;
+					 nanoIt = System.nanoTime()-nanoTemp;
 					 secsIt = nanoIt / 1000000000;
 					 millIt = nanoIt / 1000000;
+					 binPathShort.iterator++;
 
 				 }
+				 if (debug)
 				 System.out.println("\n[END TOTAL ITERATIONS] Time elapsed . Secs ("+secs+") mill ("+mill+") nano ("+nanoSecs+")");
 					 
 

@@ -1,4 +1,0 @@
-        padding = new PKCS5Padding(blockSize);
-@exception BadPaddingException if this cipher is in decryption mode,
-     * and (un)padding has been requested, but the decrypted data is not
-     * bounded by the appropriate padding bytes

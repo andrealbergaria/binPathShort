@@ -15,14 +15,23 @@ import java.io.PrintWriter;
 import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.IntBuffer;
+import java.nio.ShortBuffer;
+import java.nio.charset.Charset;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.RandomAccess;
+import java.util.StringTokenizer;
 
 import javax.xml.crypto.dsig.keyinfo.KeyInfo;
 
@@ -38,12 +47,13 @@ import binPathShort.AES;
 
 public class util {
 
-	public static void writeLog(BigInteger min,BigInteger max,String id) {
+	// timeElapsed-> time took to complete iteration
+	public static void writeLog(long timeElapsed,BigInteger min,BigInteger max,String id) {
 		try {
 		    
 			
 			String s = getDate();
-			s+="\nID : "+id;
+			s+="\nID : "+id+" ("+timeElapsed+") secs";
 			s+="\n0x"+min.toString(16)+" ";
 			s+="0x"+max.toString(16)+"\n";
 			Files.write(Paths.get("log"), s.getBytes(), StandardOpenOption.APPEND);
@@ -168,23 +178,7 @@ public class util {
      	}
      	return cipherText;
      }
-	public static void printAllPlaintexts() {
 	
-	int index = 0;
-
-	char[] b;
-	for (int i=0; i < AES.allPlainTexts.size(); i++) {
-		System.out.println();
-		// type of b (byte[])
-		b = (char[]) AES.allPlainTexts.get(i);
-		System.out.println(Arrays.toString(b));
-		index++;
-	}
-	System.out.println("\nNumber of plaintexts printed "+index);
-		
-	
-	}
-
 	 public static void writePossibleKey(byte[] key,byte[] plainText,String id) {
 		 try {
 			PrintWriter pw = new PrintWriter(new FileWriter(new File("possible_keys"),true));
@@ -243,46 +237,126 @@ public class util {
 		return dateString;
 	}
 
+	public static short[] convertIntToShortArray(int i) {
+		ByteBuffer bb = ByteBuffer.allocate(4);
+		bb.putInt(i);
+		return bb.asShortBuffer().array();
+	}
+	// 
+	// 	FROM https://stackoverflow.com/questions/5625573/byte-array-to-short-array-and-back-again-in-java
+	public static short[] convertStringToShortArray(String s) {
+		byte[] t = s.getBytes();
+		short[] shorts = new short[t.length/2];
+		return ByteBuffer.wrap(t).asShortBuffer().put(shorts).array();
+
+	}
+	// iteration is 0 -> 0xffff
+	 /*public static void getFFFF() {
+		 
+		 for (int i=0; i < 0xffff;i++) {
+			 callFFFF();
+		 }
+		 
+	 }
+		*/ 
+		 public static void callFFFF() {
+			 System.out.print(" [ ");
+			 for (int i=0; i < 0xffff; i++) 
+				 System.out.print(i+",");
+			 System.out.println(" ] ");
+		 }
+	
+		// for (int i=0; i < 16; i++) {
+	//		 callFFFF();
+	//	 }
+
+	//public it {
+		//lenOfArray = 16 16 * callFFFF() = {0x -> 0xffff}
+		//  
+		// 
+	
+	 // adds one to number represented by the short array val1
+		  
+		 public static int getIndexNotFFFF(short[] arr) {
+			 for (int i=0; i < arr.length; i++){
+				 if (arr[i] ==0  || arr[i] < 0xffff)
+					 return i;
+			 }
+			 return -1;
+			 
+		 }
+		public static short[] add(short[] arr) {
+			int idx = getIndexNotFFFF(arr);
+			if (idx == -1) { 
+				System.out.println("\n[util add()] idx -1");
+				return null;
+			}
+			else
+				arr[idx]++;
+			return arr;
+		}
+		 
+	// byte array used in key
+	// https://stackoverflow.com/questions/10804852/how-to-convert-short-array-to-byte-array
+	public static byte [] shortArrayToByteArray(short [] input)
+	{
+	  int short_index, byte_index;
+	  int iterations = input.length;
+
+	  byte [] buffer = new byte[input.length * 2];
+
+	  short_index = byte_index = 0;
+
+	  for(/*NOP*/; short_index != iterations; /*NOP*/)
+	  {
+	    buffer[byte_index]     = (byte) (input[short_index] & 0x00FF); 
+	    buffer[byte_index + 1] = (byte) ((input[short_index] & 0xFF00) >> 8);
+
+	    ++short_index; byte_index += 2;
+	  }
+
+	  return buffer;
+	}
 	public static void readLog() {
 		try {
-			File log = new File("log");
 			
-			if (log.length() ==0 || !log.exists()) {
-					System.out.println("\nlog file doesn't exist or is empty..assuming default");
-					// default
-					binPathShort.min = new BigInteger("0");
-			    	binPathShort.max = new BigInteger("524288"); // 524288 => 65536*8
-			    	return;
-			}
-			else {
+			
+			Path path = FileSystems.getDefault().getPath("log");
+			File f = path.toFile();
+			
 				
-		     BufferedReader reader = new BufferedReader(new FileReader(log));
-		     String line="",minMaxRead="";
-			 int countLines =0;
-
-			    while ((line = reader.readLine()) != null) 
-			    {	countLines++;
-			        minMaxRead = line;
-			    }
+				List<String> allLines = 	Files.readAllLines(path, Charset.defaultCharset());
+			 
+			 
+			    String lastIterator = allLines.get(allLines.size()-2);
+			    String lastMinMax = allLines.get(allLines.size()-1);
 			    
-			    String[] minMax = minMaxRead.split(" ");
+			    String[] minMax = lastMinMax.split(" ");
+			    StringTokenizer toks = new StringTokenizer(lastIterator);
 			    
-			    if (countLines % 3 != 0 && countLines != 0 || minMax.length != 2) {
-			    	System.out.println("\nWrong log format, assuming default [0,524288]");
+			    if (allLines.size() % 3 != 0 || minMax.length != 2 || toks.countTokens() != 6 || f.length() ==0 || !f.exists()) {
+			    	System.out.println("\nWrong log format, assuming default [0,0x80000], iterator = 0");
 			    	// default
-			    	binPathShort.min = new BigInteger("0");
-			    	binPathShort.max = new BigInteger("524288"); // 524288 => 65536*8
+			    	binPathShort.max = convertIntToShortArray(0x80000); // default 524288 => 65536*8 => 0x80000
+					binPathShort.min[0] = 0;
+			    	binPathShort.iterator=0;
+			    	
 			    }
 			    else {
- 
-			    binPathShort.min = new BigInteger(minMax[0].substring(2),16);
-			    binPathShort.max = new BigInteger(minMax[1].substring(2),16);
+			    	String itNumber = "";
+			    	for (int i=0; i < 4;i++)
+			    		itNumber = toks.nextToken();
+			    	
+			    binPathShort.min = convertStringToShortArray(minMax[0].substring(2));
+			    binPathShort.max = convertStringToShortArray(minMax[1].substring(2));
+			    binPathShort.iterator = Integer.parseInt(itNumber);
 			    
-				System.out.println("\n[util.java readLog()]  Min "+binPathShort.min+" Max "+ binPathShort.max);
-			    }
-			    reader.close();
+				System.out.println("\n[util.java readLog()]  Min 0x"+Arrays.toString(binPathShort.min)+" Max 0x"+ Arrays.toString(binPathShort.max)+" Iterator "+itNumber);
+				
+			    
+			    
 			}
-		     	 // format :  "min max"
+		     	 // 
 		    	 
 		    	 
 		     }
