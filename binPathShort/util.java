@@ -48,18 +48,20 @@ import binPathShort.AES;
 public class util {
 
 	// timeElapsed-> time took to complete iteration
-	public static void writeLog(long timeElapsed,BigInteger min,BigInteger max,String id) {
+	public static void writeLog(long timeElapsed,short[] min,short[] max,String id) {
 		try {
 		    
+			String minStr = util.shortArrayToStringHexadecimal(min);
+			String maxStr = util.shortArrayToStringHexadecimal(max);
 			
 			String s = getDate();
 			s+="\nID : "+id+" ("+timeElapsed+") secs";
-			s+="\n0x"+min.toString(16)+" ";
-			s+="0x"+max.toString(16)+"\n";
+			s+="\n0x"+minStr;
+			s+="0x"+maxStr;
 			Files.write(Paths.get("log"), s.getBytes(), StandardOpenOption.APPEND);
 			
 			
-			System.out.println("\nWrote log [0x"+min.toString(16)+",0x"+max.toString(16)+"]");
+			System.out.println("\nWrote log [0x"+minStr+",0x"+maxStr+"]");
 			
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
@@ -246,37 +248,28 @@ public class util {
 	// 	FROM https://stackoverflow.com/questions/5625573/byte-array-to-short-array-and-back-again-in-java
 	public static short[] convertStringToShortArray(String s) {
 		byte[] t = s.getBytes();
-		short[] shorts = new short[t.length/2];
-		return ByteBuffer.wrap(t).asShortBuffer().put(shorts).array();
-
+		short[] sh = new short[t.length/2];
+		ByteBuffer bb = ByteBuffer.allocate(t.length);
+		bb.put(t);
+		bb = bb.order(ByteOrder.LITTLE_ENDIAN);
+		ShortBuffer bs = bb.asShortBuffer();
+		
+		bs.get(t);
+		
+		System.out.println(bs.hasArray());
+		
+		return bs.array();
+		
 	}
-	// iteration is 0 -> 0xffff
-	 /*public static void getFFFF() {
-		 
-		 for (int i=0; i < 0xffff;i++) {
-			 callFFFF();
-		 }
-		 
-	 }
-		*/ 
-		 public static void callFFFF() {
-			 System.out.print(" [ ");
-			 for (int i=0; i < 0xffff; i++) 
-				 System.out.print(i+",");
-			 System.out.println(" ] ");
-		 }
+	// 	 // adds one to number represented by the short array val1
 	
-		// for (int i=0; i < 16; i++) {
-	//		 callFFFF();
-	//	 }
-
-	//public it {
-		//lenOfArray = 16 16 * callFFFF() = {0x -> 0xffff}
-		//  
-		// 
-	
-	 // adds one to number represented by the short array val1
-		  
+		 public static String getHexaStringFromArray(short[] t) {
+			 String ret =" ";
+			 for (short elem : t) {
+				 ret += String.format("%x",elem)+" ";
+			 }
+			 return ret;
+		 }
 		 public static int getIndexNotFFFF(short[] arr) {
 			 for (int i=0; i < arr.length; i++){
 				 if (arr[i] ==0  || arr[i] < 0xffff)
@@ -285,7 +278,7 @@ public class util {
 			 return -1;
 			 
 		 }
-		public static short[] add(short[] arr) {
+		public static short[] addOne(short[] arr) {
 			int idx = getIndexNotFFFF(arr);
 			if (idx == -1) { 
 				System.out.println("\n[util add()] idx -1");
@@ -295,7 +288,33 @@ public class util {
 				arr[idx]++;
 			return arr;
 		}
-		 
+	
+		public static short[] addValue(short[] arr,int val) {
+			short[] temp = new short[arr.length];
+			int idx = getIndexNotFFFF(arr);
+			int interval = Math.abs(val + arr[idx]);
+			if (interval <= 0xffff)
+				temp[idx] += val;
+			else {
+				int k = 0; // k * 0xffff to subtract from val and check if it fits on the short array
+				int num=0;
+				while (num >= 0xffff) {
+					num = val-0xffff*k;
+					k++;
+				}
+				temp[k] = (short) num;
+				}
+			
+				
+			return temp;
+		}
+		public static String shortArrayToStringHexadecimal(short [] arg) {
+			String s = "";
+			for (short elem : arg)
+				s = String.format("%x",elem) + " ";
+			return s;
+		}
+		
 	// byte array used in key
 	// https://stackoverflow.com/questions/10804852/how-to-convert-short-array-to-byte-array
 	public static byte [] shortArrayToByteArray(short [] input)
@@ -351,7 +370,10 @@ public class util {
 			    binPathShort.max = convertStringToShortArray(minMax[1].substring(2));
 			    binPathShort.iterator = Integer.parseInt(itNumber);
 			    
-				System.out.println("\n[util.java readLog()]  Min 0x"+Arrays.toString(binPathShort.min)+" Max 0x"+ Arrays.toString(binPathShort.max)+" Iterator "+itNumber);
+			    String minStr = util.getHexaStringFromArray(binPathShort.min);
+			    String maxStr = util.getHexaStringFromArray(binPathShort.max);
+			    
+				System.out.println("\n[util.java readLog()]  Min 0x"+minStr+" Max 0x"+maxStr+" Iterator "+itNumber);
 				
 			    
 			    

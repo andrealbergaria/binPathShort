@@ -153,7 +153,7 @@ public static byte[][] decrypt(byte[][] cipherText,SecretKeySpec skv)  {
 		 
 		
           
-		 public static void tryKey(byte[][] cipherText) throws Exception  {
+		 public static void tryKey(byte[][] cipherText,short[] min,short[] max) throws Exception  {
 
 			 /*
 			  * 
@@ -173,7 +173,7 @@ public static byte[][] decrypt(byte[][] cipherText,SecretKeySpec skv)  {
 		                                 
 		                                 // o numero de elementos dum conjunto é o max valor
 		                				 
-		                                  while (!Arrays.equals(min,max) {
+		                                  while (!Arrays.equals(min,max)) {
 		                                	  key = util.shortArrayToByteArray(binPathShort.min);
 		                                	     sk = new SecretKeySpec(key, "AES");
 		                                       
@@ -182,7 +182,8 @@ public static byte[][] decrypt(byte[][] cipherText,SecretKeySpec skv)  {
 		                                       
 		                                        	for (int block=0; block < AES.numOfBlocksToDecipher; block++) {
 		                                        		if (util.isAscii(temp[block]) == true) {
-		                                        		 util.writePossibleKey(key,temp[block],"0x"+min.toString(16)); // key in bytes and write id on file test in this case
+		                                        			String t = util.getHexaStringFromArray(min);
+		                                        		 util.writePossibleKey(key,temp[block],"0x"+t); // key in bytes and write id on file test in this case
 		                                        		 if (AES.debug)
 		   		                 						 System.out.println("\nFound Key "+Arrays.toString(key));
 		   		                 						 
@@ -191,10 +192,8 @@ public static byte[][] decrypt(byte[][] cipherText,SecretKeySpec skv)  {
 		                                        		}
 		                                        	}
 		                 					  
-		                                        min = min.add(BigInteger.ONE);	
-		                                        
-		                                        
-		                                 }
+		                                        min = util.addOne(min);	
+		                                        }
 		                                 
 		                                 
 		                            }
@@ -202,7 +201,7 @@ public static byte[][] decrypt(byte[][] cipherText,SecretKeySpec skv)  {
 
 		 
 
-		 public static void cycle(BigInteger min,BigInteger max,BigInteger interval) {
+		 public static void cycle(short[] min,short[] max,int interval) {
 //			 Integer max value 2147483647
 //			 Short max value 32767
 //			 Long max 9223372036854775807
@@ -222,8 +221,7 @@ public static byte[][] decrypt(byte[][] cipherText,SecretKeySpec skv)  {
 				 long millIt=0;
 				 long nanoTemp=0;
 				  
-				 BigInteger maxInt = new BigInteger("2147483647");
-				 while(min.compareTo(maxInt) < 0) {
+				 while(!Arrays.equals(min,max)) {
 					 
 					 nanoSecs = System.nanoTime()-begin;
 					 nanoTemp=System.nanoTime();
@@ -241,7 +239,7 @@ public static byte[][] decrypt(byte[][] cipherText,SecretKeySpec skv)  {
 					 util.writeLog(secsIt,min,max,"Iteration "+binPathShort.iterator);
 					 
 					 min = max;
-					 max=max.add(interval);
+					 max=util.addValue(max,interval);
 					 
 					 nanoIt = System.nanoTime()-nanoTemp;
 					 secsIt = nanoIt / 1000000000;
@@ -259,39 +257,6 @@ public static byte[][] decrypt(byte[][] cipherText,SecretKeySpec skv)  {
 					 e.printStackTrace();
 				 }
 		 }
-					 //System.out.println("Min "+min.toString(10)+" Max "+max.toString(10));
-				
-					 //tryKey();
-					 
-				//	 min=max;
-			//		 max =max.add(new BigInteger(interval));
-
-					/* if (interrupt == 2000) {
-						nanoSecs = System.nanoTime() - begin;
-						secs = nanoSecs / 1000000000;
-						mill = nanoSecs / 1000000;
-						System.out.println("\nTime elapsed . Secs ("+secs+") mill ("+mill+") nano ("+nanoSecs+")");
-						interrupt=0;
-					 }
-					 interrupt++;
-					}
-					
-				
-
-				  nanoSecs = System.nanoTime() - begin;
-				  secs = nanoSecs / 1000000000;
-				  mill = nanoSecs / 1000000;
-				 System.out.println("\nTime elapsed . Secs ("+secs+") mill ("+mill+") nano ("+nanoSecs+")");
-				 */
-				/*  if (allPlainTexts != null && !allPlainTexts.isEmpty()) {
-					  // write file lot faster than print it and use bash commands
-					  ReadAndWrite.writeFile(allPlainTexts);
-				  }
-				 else
-					 System.out.println("\n[getPlainTextBlock] No plaintext collected");
-					 */
-			
-		 
 		 
 		 //https://stackoverflow.com/questions/8377050/how-do-i-determine-number-of-bytes-needed-to-represent-a-given-integer
 		 public static int bytesSize(long val) {

@@ -36,15 +36,15 @@ public class binPathShort {
 			
 
 		
-				//util.readLog();
+				util.readLog();
 			   
-				AES.correctKey[0] =0x61;
-				AES.correctKey[1] = 0x61;
+				//AES.correctKey[0] =0x61;
+			//	AES.correctKey[1] = 0x61;
 				
 				// prints array correctly System.out.println(Arrays.toString(AES.correctKey));
 				//long max = interval;
 				//AES.tryCorrectKey();
-				//AES.cycle(min,max,interval);
+				AES.cycle(min,max,interval);
 	}
 
 }
